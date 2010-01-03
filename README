@@ -1,0 +1,32 @@
+ INSPext
+
+
+  IN SHORT
+
+INSPext stands for "INSPext is a Not-So-PlaintEXT".  The INSPext project is yet another attempt at defining a grammar for an abstract text; text that can easily be exported and imported to and from many other text formats.
+  
+  GETTING UNNECESSARILY WORDY
+  
+Text written in INSPext can be easily exported and imported to and from plaintext, LaTeX, Microsoft Word, Apple iWork Pages and other popular formats and tools.  The idea is that for some rare kinds of people (read: me) it is hard to pick a text format or a typesetting tool and stick to it.  I thus embarked on defining my own text language and typesetting philosophy in order to rest myself assured that at any point in time I can easily change my writing tool. You may claim that I'm out of my mind.  Yes, that is correct.
+
+INSPext is an abstraction, and as such it inherently means loss of information.  It means that when you move to and from other tools the transfer will not be smooth unless your text is extremely trivial.  That is, INSPext compilers will drop elements of your text when compiling your text into other languages or file formats.  This is because the INSPext language is so friggin simple and stupid that it doesn't know all the tricks that other tools know and don't have in common.
+
+Indeed, on the flip side this also means that with little effort you will quickly learn the entire INSPext language and will be able to spit out INSPext documents intuitively off the top of your head without the need for a reference manual.  Or so I hope.
+
+Yes, you may very well wonder what is the point if you can't use styles in your documents, embed images, create hyper-links, define paragraph indents and so forth.  INSPext is not just a language, but also a philosophy.
+
+  INSPext's PHILOSOPHY
+
+The INSPext philosophy really expands and formalizes on that of plaintext (or so I like telling myself).  The idea is that text should be simple, very simple.  Pictures are complex beasts, brochurs are complex beasts, women are complex beasts -- but text is a simple beast.  So our text boils down to letters, words, sentences, paragraphs, sections (or chapters).  Let's also allow for a title, but that's it for now.
+ 
+Perhaps it would be overly religious to disallow tables, but others may say it is also fundamental to allow for mathematical expressions, tables of contents, bibliography and other common elements.  So lets go back to our goal: simple, intuitive, reference-free grammar for writing text.  We'll stick to that for now.  In time, I trust, we will come to appreciate that.
+
+  AIGHT SO LETS GET DOWN TO BUSINESS
+
+I'll give you a feeling for an INSPext document through an example.  This README file you are reading is written in INSPext.  You may notice there is little special about its layout or format, apart from the fact it is plaintext.
+
+Section titles are written in ALL-CAPS and are indented.  Specifically, they are indented by two spaces.  The title of the document is also indented by a single space, but isn't really in all-caps; That's fine, all-caps or not, this is optional and merely syntactic sugar.  Truth be told it doesn't matter if you choose to indent section titles by two or three spaces.  Their semantic as section titles comes when they are indented more than the title of the document.
+
+Paragraphs have a single empty line (in other words, two newlines) separating them.
+
+That's it, that's all there is to know, I think.  Go ahead and have fun INSPexting!
