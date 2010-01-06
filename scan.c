@@ -34,10 +34,6 @@ token* scan(FILE* is, lex_state* state)
             tok->type = CHARACTER;
             tok->ch = ch;
         }
-    } else if( ch == '-' || ch == '*' ) { /* intentional fall-through */
-        if( state->beginning_of_line );
-    } else if( ch >= '0' && ch <= '9' ) { /* intentional fall-throughs */
-        if( state->beginning_of_line );
     } else {
         state->beginning_of_line = 0;
         tok->type = CHARACTER;
