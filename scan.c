@@ -8,10 +8,11 @@ token* scan(FILE* is, lex_state* state)
     token* tok;
 
     ch = fgetc(is);
-    if( ch == EOF ) return NULL;
     tok = (token*)malloc(sizeof(token));
     tok->level = state->level;
-    if( ch == ' ' ) {
+    if( ch == EOF ) {
+        tok->type = END;
+    } else if( ch == ' ' ) {
         if( state->beginning_of_line ) {
             tok->type = INDENT;
             ++state->level;
