@@ -93,7 +93,7 @@ static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstat
         if( tok->type == PARAGRAPH_TOKEN ) {
             putback(tok, pstate);
             break;
-        } else if( tok->type != CHARACTER_NODE ) {
+        } else if( tok->type != CHARACTER_TOKEN ) {
             fprintf(stderr, "ERROR:Unexpected token %s\n", token_s(tok->type));
             /* FIXME: handle error properly */
             free_node(the_node);
