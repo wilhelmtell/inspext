@@ -32,20 +32,25 @@ node* parse_indent(FILE* is, lex_state* state)
 
 node* parse_character(FILE* is, lex_state* state)
 {
+    node* child_node = NULL;
     token* tok = NULL;
+
     tok = scan(is, state);
+    child_node = (node*)malloc(sizeof(node));
+    child_node->ch = tok->ch;
+    child_node->children = child_node->siblings = NULL;
+    child_node->type = CHARACTER_NODE;
     printf("Got '%c'\n", tok->ch);
-    return NULL;
+    return child_node;
 }
 
 node* parse_indented_text(FILE* is, lex_state* state)
 {
     node* child_node;
-    token* tok;
 
     while( 1 ) {
         child_node = parse_character(is, state);
-        if( tok->ch == '\n' ) {
+        if( child_node->ch == '\n' ) {
             /* FIXME: maintain a buffer, like scanner's stream_buf_t */
             /* putt(tok, state); */
             break;
@@ -59,7 +64,7 @@ node* parse_heading(FILE* is, lex_state* state)
     int i = 0;
     node* child_node;
 
-    while( i < state->heading_level )
+    for(i = 0; i < state->heading_level; ++i )
         free_node(parse_indent(is, state));
     child_node = parse_indented_text(is, state);
     return child_node;
