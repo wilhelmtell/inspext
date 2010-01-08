@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include "token.h"
 
+typedef struct stream_buf_t {
+    int ch;
+    struct stream_buf_t* next;
+} stream_buf_t;
+
 typedef struct lex_state {
     int beginning_of_line;
     int indenting;

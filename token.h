@@ -14,9 +14,4 @@ typedef struct token {
     int heading_level;
 } token;
 
-typedef struct stream_buf_t {
-    int ch;
-    struct stream_buf_t* next;
-} stream_buf_t;
-
 #endif // TOKEN_H_
