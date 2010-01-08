@@ -15,8 +15,10 @@ char* token_s(enum token_type t)
 void free_node(node* n)
 {
     /* TODO: convert to loop */
-    while( n->children != NULL ) free_node(n->children);
-    while( n->siblings != NULL ) free_node(n->siblings);
+    if( n != NULL ) {
+        while( n->children != NULL ) free_node(n->children);
+        while( n->siblings != NULL ) free_node(n->siblings);
+    }
     free(n);
 }
 
