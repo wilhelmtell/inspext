@@ -40,7 +40,10 @@ static node* parse_character(FILE* is, lex_state* lstate, parse_state* pstate)
     child_node->ch = tok->ch;
     child_node->children = child_node->siblings = NULL;
     child_node->type = CHARACTER_NODE;
-    printf("Got '%c'\n", tok->ch);
+    if( tok->ch == '\n' )
+        printf("Got NL\n");
+    else
+        printf("Got '%c'\n", tok->ch);
     return child_node;
 }
 
