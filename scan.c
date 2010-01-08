@@ -2,6 +2,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void putback(int ch, lex_state* state)
+{
+    stream_buf_t* tmp = state->stream_buf;
+
+    state->stream_buf = (stream_buf_t*)malloc(sizeof(stream_buf_t));
+    state->stream_buf->ch = ch;
+    state->stream_buf->next = tmp;
+}
+
+int sip(FILE* is, lex_state* state)
+{
+    stream_buf_t* tmp;
+    int ch;
+
+    if( state->stream_buf != NULL ) {
+        tmp = state->stream_buf;
+        ch = state->stream_buf->ch;
+        state->stream_buf = state->stream_buf->next;
+        free(tmp);
+    } else {
+        ch = fgetc(is);
+    }
+    return ch;
+}
+
 token* scan(FILE* is, lex_state* state)
 {
     int ch;
