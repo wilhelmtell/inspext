@@ -93,6 +93,7 @@ static node* parse_character(FILE* is, lex_state* lstate, parse_state* pstate)
     return child_node;
 }
 
+/* FIXME: return the entire heading as a single string */
 static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     node *the_node, *child_node, *pos;
@@ -130,19 +131,32 @@ static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
     return child_node;
 }
 
+/* TODO: implement */
 static node* parse_nl(FILE* is, lex_state* lstate, parse_state* pstate)
 {
-    node* child_node;
-    child_node = parse_character(is, lstate, pstate);
-    /* TODO: check it's a newline */
-    return NULL;
+    node* the_node;
+    token* tok;
+
+    the_node = parse_character(is, lstate, pstate);
+    if( the_node->ch != '\n' ) {
+        tok = (token*)malloc(sizeof(token));
+        tok->type = CHARACTER_TOKEN;
+        tok->ch = the_node->ch;
+        fprintf(stderr, "ERROR:Expected newline, found '%c'\n", the_node->ch);
+        putback(tok, pstate);
+        return NULL;
+    }
+    return the_node;
 }
 
+/* TODO: implement */
 static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     node* child_node;
     child_node = parse_nl(is, lstate, pstate);
+    if( child_node == NULL ) return NULL;
     child_node = parse_nl(is, lstate, pstate);
+    if( child_node == NULL ) return NULL;
     do {
         child_node = parse_character(is, lstate, pstate);
     } while( child_node->type == CHARACTER_NODE );
