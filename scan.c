@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void putback(int ch, lex_state* state)
+static void putback(int ch, lex_state* state)
 {
+    /* FIXME: check for NULL */
     stream_buf_t* tmp = state->stream_buf;
 
     state->stream_buf = (stream_buf_t*)malloc(sizeof(stream_buf_t));
@@ -11,11 +12,12 @@ void putback(int ch, lex_state* state)
     state->stream_buf->next = tmp;
 }
 
-int sip(FILE* is, lex_state* state)
+static int sip(FILE* is, lex_state* state)
 {
     stream_buf_t* tmp;
     int ch;
 
+    /* FIXME: check for NULL */
     if( state->stream_buf != NULL ) {
         tmp = state->stream_buf;
         ch = state->stream_buf->ch;

@@ -3,7 +3,7 @@
 #include "options.h"
 #include "parse.h"
 
-int sanity(conf* opts)
+static int sanity(conf* opts)
 {
     if( opts->input_files == NULL ) {
         fprintf(stderr,
@@ -24,7 +24,8 @@ int sanity(conf* opts)
 int main(int argc, char* argv[])
 {
     conf opts = { UNDEFINED_TARGET, NULL };
-    lex_state state = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL };
+    lex_state lstate = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL };
+    parse_state pstate = { NULL };
     node* rep;
     input_file *file, *tmp_file;
 
@@ -33,9 +34,9 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     file = opts.input_files;
     while( file != NULL ) {
-        state.filename = file->filename;
+        lstate.filename = file->filename;
         while( ! feof(file->stream) ) {
-            rep = parse_text(file->stream, &state);
+            rep = parse_text(file->stream, &lstate, &pstate);
             free(rep);
         }
         if( file->stream != stdin ) fclose(file->stream);

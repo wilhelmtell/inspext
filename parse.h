@@ -18,6 +18,16 @@ typedef struct node {
     void* node_data;
 } node;
 
-node* parse_text(FILE* is, lex_state* state);
+typedef struct token_buf_t {
+    token* tok;
+    struct token_buf_t* next;
+} token_buf_t;
+
+typedef struct parse_state {
+    token_buf_t* token_buf;
+} parse_state;
+
+node* parse_text(FILE* is, lex_state* state, parse_state* pstate);
+void free_node(node* n);
 
 #endif // PARSE_H_
