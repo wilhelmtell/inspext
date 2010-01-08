@@ -1,7 +1,8 @@
 #include "parse.h"
-#include <stdlib.h>
 #include "scan.h"
+#include <stdlib.h>
 
+/* TODO: get rid of this when done */
 static char* token_s(enum token_type t)
 {
     if( t == HEADING_TOKEN ) return "HEADING";
@@ -10,6 +11,48 @@ static char* token_s(enum token_type t)
     else if( t == INDENT_TOKEN ) return "INDENT";
     else if( t == END_TOKEN ) return "END";
     else return "DONNO";
+}
+
+static void putback(token* tok, parse_state* pstate)
+{
+    token_buf_t* tmp;
+
+    if( pstate->token_buf == NULL )
+        /* FIXME: report error */
+        return;
+    tmp = pstate->token_buf;
+    pstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
+    pstate->token_buf->tok = tok;
+    pstate->token_buf->next = tmp;
+    printf("Put back token %s", token_s(tok->type));
+    if( tok->type == CHARACTER_TOKEN ) {
+        if( tok->ch == '\n' ) printf(" NL");
+        else printf(" '%c'", tok->ch);
+    }
+    printf("\n");
+}
+
+static token* sip(FILE* is, lex_state* lstate, parse_state* pstate)
+{
+    token_buf_t* tmp;
+    token* tok;
+
+    /* FIXME: report error when NULL */
+    if( pstate->token_buf != NULL ) {
+        tmp = pstate->token_buf;
+        tok = pstate->token_buf->tok;
+        pstate->token_buf = pstate->token_buf->next;
+        free(tmp);
+    } else {
+        tok = scan(is, lstate);
+    }
+    printf("Got token %s", token_s(tok->type));
+    if( tok->type == CHARACTER_TOKEN ) {
+        if( tok->ch == '\n' ) printf(" NL");
+        else printf(" '%c'", tok->ch);
+    }
+    printf("\n");
+    return tok;
 }
 
 void free_node(node* n)
@@ -29,11 +72,11 @@ void free_node(node* n)
     free(n);
 }
 
+/* TODO: implement */
 static node* parse_indent(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     token* tok;
-    tok = scan(is, lstate);
-    printf("Got token %s\n", token_s(tok->type));
+    tok = sip(is, lstate, pstate);
     return NULL;
 }
 
@@ -42,31 +85,38 @@ static node* parse_character(FILE* is, lex_state* lstate, parse_state* pstate)
     node* child_node = NULL;
     token* tok = NULL;
 
-    tok = scan(is, lstate);
+    tok = sip(is, lstate, pstate);
     child_node = (node*)malloc(sizeof(node));
     child_node->ch = tok->ch;
     child_node->children = child_node->siblings = NULL;
     child_node->type = CHARACTER_NODE;
-    if( tok->ch == '\n' )
-        printf("Got NL\n");
-    else
-        printf("Got '%c'\n", tok->ch);
     return child_node;
 }
 
 static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstate)
 {
-    node* child_node;
+    node *the_node, *child_node, *pos;
+    token* tok;
 
+    the_node = (node*)malloc(sizeof(node));
+    pos = the_node;
     while( 1 ) {
         child_node = parse_character(is, lstate, pstate);
         if( child_node->ch == '\n' ) {
             /* FIXME: maintain a buffer, like scanner's stream_buf_t */
-            /* putt(tok, lstate); */
+            tok = (token*)malloc(sizeof(token));
+            tok->type = CHARACTER_TOKEN;
+            tok->ch = '\n';
+            putback(tok, pstate);
+            free_node(child_node);
+            pos->siblings = child_node = NULL;
             break;
+        } else {
+            pos->siblings = child_node;
+            pos = pos->siblings;
         }
     }
-    return child_node;
+    return the_node;
 }
 
 static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
@@ -110,8 +160,7 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
     the_node->children = (node*)malloc(sizeof(node));
     the_node->siblings = NULL;
     do {
-        tok = scan(is, lstate);
-        printf("Got token %s\n", token_s(tok->type));
+        tok = sip(is, lstate, pstate);
         if( tok->type == HEADING_TOKEN ) {
             the_node->children->siblings = (node*)malloc(sizeof(node));
             child_node = parse_heading(is, lstate, pstate);
