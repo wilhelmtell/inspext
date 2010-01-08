@@ -56,10 +56,14 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
         opts->input_files = (input_file*)malloc(sizeof(input_file));
         opts->input_files->filename = (char*)malloc(filename_len+1);
         strncpy(opts->input_files->filename, filename, filename_len);
-        if( strncmp(argv[optind], "-", strlen(argv[optind])) == 0 ) {
+        if( strncmp(filename, "-", filename_len) == 0 ) {
             opts->input_files->stream = stdin;
         } else {
             opts->input_files->stream = fopen(filename, "r");
+            if( opts->input_files->stream == NULL ) {
+                fprintf(stderr, "ERROR:Can't open file %s\n", filename);
+                success_flag = 0;
+            }
         }
         ++optind;
         opts->input_files->next = file;
