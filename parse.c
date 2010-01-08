@@ -156,15 +156,94 @@ static node* parse_nl(FILE* is, lex_state* lstate, parse_state* pstate)
 /* TODO: implement */
 static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
 {
-    node* child_node;
+    node *the_node, *child_node, *pos, *tmp;
+    token* tok;
+
     child_node = parse_nl(is, lstate, pstate);
-    if( child_node == NULL ) return NULL;
+    if( child_node == NULL )
+        return NULL;
+    else
+        free_node(child_node);
     child_node = parse_nl(is, lstate, pstate);
-    if( child_node == NULL ) return NULL;
-    do {
-        child_node = parse_character(is, lstate, pstate);
-    } while( child_node->type == CHARACTER_NODE );
-    return child_node;
+    if( child_node == NULL )
+        return NULL;
+    else
+        free_node(child_node);
+    while( 1 ) {
+        /* FIXME: handle character parsing errors, cleanup */
+        tok = sip(is, lstate, pstate);
+        child_node = (node*)malloc(sizeof(node));
+        child_node->ch = tok->ch;
+        child_node->children = child_node->siblings = NULL;
+        child_node->type = CHARACTER_NODE;
+        if( child_node == NULL )
+            return NULL;
+        else if( child_node->ch != '\n' ) {
+            tok = (token*)malloc(sizeof(token));
+            tok->type = CHARACTER_TOKEN;
+            tok->ch = child_node->ch;
+            putback(tok, pstate);
+            free_node(child_node);
+            break;
+        }
+        free_node(child_node);
+    }
+    /* FIXME: paragraph node as one string */
+    the_node = (node*)malloc(sizeof(node));
+    the_node->siblings = NULL;
+    the_node->children = (node*)malloc(sizeof(node*));
+    pos = the_node->children;
+    pos->children = pos->siblings = NULL;
+    while( 1 ) {
+        /* FIXME: handle character parsing errors, cleanup */
+        tok = sip(is, lstate, pstate);
+        child_node = (node*)malloc(sizeof(node));
+        child_node->ch = tok->ch;
+        child_node->children = child_node->siblings = NULL;
+        child_node->type = CHARACTER_NODE;
+        if( child_node == NULL ) {
+            free_node(the_node);
+            return NULL;
+        }
+        else if( child_node->type == END_NODE ) {
+            tok = (token*)malloc(sizeof(token));
+            tok->type = END_TOKEN;
+            putback(tok, pstate);
+            break;
+        }
+        else if( child_node->type == CHARACTER_NODE && child_node->ch == '\n' ) {
+            tmp = child_node;
+            /* FIXME: handle character parsing errors, parsing */
+            tok = sip(is, lstate, pstate);
+            child_node = (node*)malloc(sizeof(node));
+            child_node->ch = tok->ch;
+            child_node->children = child_node->siblings = NULL;
+            child_node->type = CHARACTER_NODE;
+            if( child_node->type == CHARACTER_NODE && child_node->ch == '\n' ) {
+                tok = (token*)malloc(sizeof(token));
+                tok->type = CHARACTER_TOKEN;
+                tok->ch = '\n';
+                putback(tok, pstate);
+                tok = (token*)malloc(sizeof(token));
+                tok->type = CHARACTER_TOKEN;
+                tok->ch = '\n';
+                putback(tok, pstate);
+                free_node(child_node);
+                free_node(tmp);
+                break;
+            } else {
+                tok = (token*)malloc(sizeof(token));
+                tok->type = CHARACTER_TOKEN;
+                tok->ch = '\n';
+                putback(tok, pstate);
+                free_node(child_node);
+            }
+            child_node = tmp;
+            pos->children = child_node;
+            pos = pos->children;
+        }
+    }
+    return the_node;
 }
 
 /* start */
