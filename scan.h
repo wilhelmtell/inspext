@@ -6,8 +6,13 @@
 
 typedef struct lex_state {
     int beginning_of_line;
+    int indenting;
+    int paragraph_separator;
     int lineno;
-    int level;
+    int heading_level;
+    char* filename;
+    enum token_type previous_token;
+    stream_buf_t* stream_buf;
 } lex_state;
 
 token* scan(FILE* is, lex_state* state);

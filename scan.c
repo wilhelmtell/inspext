@@ -30,40 +30,58 @@ int sip(FILE* is, lex_state* state)
 token* scan(FILE* is, lex_state* state)
 {
     int ch;
+    int i;
     token* tok;
 
-    ch = fgetc(is);
+    ch = sip(is, state);
     tok = (token*)malloc(sizeof(token));
-    tok->level = state->level;
     if( ch == EOF ) {
-        tok->type = END;
+        tok->type = END_TOKEN;
     } else if( ch == ' ' ) {
         if( state->beginning_of_line ) {
-            tok->type = INDENT;
-            ++state->level;
+            tok->type = HEADING_TOKEN;
+            state->previous_token = HEADING_TOKEN;
+            state->indenting = 1;
+            state->beginning_of_line = 0;
+            for( i = 0; ch == ' '; ++i ) { /* calculate level */
+                ch = sip(is, state);
+            }
+            if( i > state->heading_level )
+                i = ++state->heading_level;
+            else /* FIXME: trap inconsistent indents */
+                state->heading_level = i;
+            tok->heading_level = i;
+            putback(ch, state);
+            while( i-- > 0 ) { /* restore input: putback indent */
+                putback(' ', state);
+            }
+        } else if( state->indenting ) { /* not beginning_of_line */
+            tok->type = INDENT_TOKEN;
+            state->previous_token = INDENT_TOKEN;
         }
     } else if( ch == '\n' ) {
         state->beginning_of_line = 1;
-        state->level = 0;
-        ++state->lineno;
-        ch = fgetc(is);
-        if( ch == '\n' ) {
-            while( ch != EOF && ch == '\n' ) ch = fgetc(is);
-            if( ch == EOF ) tok->type = END;
-            else {
-                fputc(ch, is);
-                tok->type = PARAGRAPH;
-            }
-        } else {
-            fputc(ch, is);
-            tok->type = CHARACTER;
-            tok->ch = ch;
+        state->indenting = 0;
+        ch = sip(is, state);
+        if( ch == '\n' && ! state->paragraph_separator ) {
+            putback('\n', state);
+            putback('\n', state);
+            tok->type = PARAGRAPH_TOKEN;
+            state->previous_token = PARAGRAPH_TOKEN;
+            state->paragraph_separator = 1;
+        } else { /* FIXME: treat lines with only whitespace as empty lines */
+            putback(ch, state);
+            ++state->lineno;
+            tok->type = CHARACTER_TOKEN;
+            state->previous_token = CHARACTER_TOKEN;
+            tok->ch = '\n';
         }
     } else {
-        state->beginning_of_line = 0;
-        tok->type = CHARACTER;
+        state->paragraph_separator = 0;
+        tok->type = CHARACTER_TOKEN;
+        state->previous_token = CHARACTER_TOKEN;
+        state->beginning_of_line = state->indenting = 0;
         tok->ch = ch;
     }
-    tok->level = state->level;
     return tok;
 }
