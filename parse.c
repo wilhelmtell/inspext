@@ -17,9 +17,6 @@ static void putback(token* tok, parse_state* pstate)
 {
     token_buf_t* tmp;
 
-    if( pstate->token_buf == NULL )
-        /* FIXME: report error */
-        return;
     tmp = pstate->token_buf;
     pstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
     pstate->token_buf->tok = tok;
