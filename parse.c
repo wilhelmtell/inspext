@@ -112,7 +112,7 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
         } else {
             fprintf(stderr, "%s:%d:Unexpected token %s\n",
                     lstate->filename, lstate->lineno, token_s(tok->type));
-            free_node(the_node);
+            free_node(the_node->children);
             the_node->children = NULL;
         }
         free(tok);
