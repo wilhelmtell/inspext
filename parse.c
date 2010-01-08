@@ -80,19 +80,6 @@ static node* parse_indent(FILE* is, lex_state* lstate, parse_state* pstate)
     return NULL;
 }
 
-static node* parse_character(FILE* is, lex_state* lstate, parse_state* pstate)
-{
-    node* child_node = NULL;
-    token* tok = NULL;
-
-    tok = sip(is, lstate, pstate);
-    child_node = (node*)malloc(sizeof(node));
-    child_node->ch = tok->ch;
-    child_node->children = child_node->siblings = NULL;
-    child_node->type = CHARACTER_NODE;
-    return child_node;
-}
-
 /* FIXME: return the entire heading as a single string */
 static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstate)
 {
@@ -102,9 +89,21 @@ static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstat
     the_node = (node*)malloc(sizeof(node));
     pos = the_node;
     while( 1 ) {
-        child_node = parse_character(is, lstate, pstate);
+        tok = sip(is, lstate, pstate);
+        if( tok->type == PARAGRAPH_TOKEN ) {
+            putback(tok, pstate);
+            break;
+        } else if( tok->type != CHARACTER_NODE ) {
+            fprintf(stderr, "ERROR:Unexpected token %s\n", token_s(tok->type));
+            /* FIXME: handle error properly */
+            free_node(the_node);
+            return NULL;
+        }
+        child_node = (node*)malloc(sizeof(node));
+        child_node->ch = tok->ch;
+        child_node->children = child_node->siblings = NULL;
+        child_node->type = CHARACTER_NODE;
         if( child_node->ch == '\n' ) {
-            /* FIXME: maintain a buffer, like scanner's stream_buf_t */
             tok = (token*)malloc(sizeof(token));
             tok->type = CHARACTER_TOKEN;
             tok->ch = '\n';
@@ -131,13 +130,18 @@ static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
     return child_node;
 }
 
-/* TODO: implement */
+/* TODO: get rid of this fn.  NL is a terminal */
 static node* parse_nl(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     node* the_node;
     token* tok;
 
-    the_node = parse_character(is, lstate, pstate);
+    /* FIXME: handle character parsing errors, cleanup */
+    tok = sip(is, lstate, pstate);
+    the_node = (node*)malloc(sizeof(node));
+    the_node->ch = tok->ch;
+    the_node->children = the_node->siblings = NULL;
+    the_node->type = CHARACTER_NODE;
     if( the_node->ch != '\n' ) {
         tok = (token*)malloc(sizeof(token));
         tok->type = CHARACTER_TOKEN;
