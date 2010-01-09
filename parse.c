@@ -14,6 +14,7 @@ static char* token_s(enum token_type t)
     else return "DONNO";
 }
 
+/* TODO: this functionality should be in scan.c */
 static void putback(token* tok, parse_state* pstate)
 {
     token_buf_t* tmp;
@@ -30,6 +31,7 @@ static void putback(token* tok, parse_state* pstate)
     printf("\n");
 }
 
+/* TODO: this functionality should be in scan.c */
 static token* sip(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     token_buf_t* tmp;
@@ -85,10 +87,11 @@ static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstat
     token* tok;
 
     the_node = (node*)malloc(sizeof(node));
+    the_node->children = the_node->siblings = NULL;
     pos = the_node;
     while( 1 ) {
         tok = sip(is, lstate, pstate);
-        if( tok->type == PARAGRAPH_TOKEN ) {
+        if( tok->type == PARAGRAPH_TOKEN ) { /* FIXME: END_TOKEN? */
             putback(tok, pstate);
             break;
         } else if( tok->type != CHARACTER_TOKEN ) {
@@ -98,23 +101,25 @@ static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstat
             free_node(the_node);
             return NULL;
         }
-        child_node = (node*)malloc(sizeof(node));
-        child_node->ch = tok->ch;
-        child_node->children = child_node->siblings = NULL;
-        child_node->type = CHARACTER_NODE;
-        if( child_node->ch == '\n' ) {
-            tok = (token*)malloc(sizeof(token));
-            tok->type = CHARACTER_TOKEN;
-            tok->ch = '\n';
+        if( tok->ch == '\n' ) {
             putback(tok, pstate);
-            free_node(child_node);
             pos->siblings = child_node = NULL;
             break;
         } else {
+            child_node = (node*)malloc(sizeof(node));
+            child_node->type = CHARACTER_NODE;
+            child_node->ch = tok->ch;
+            child_node->children = child_node->siblings = NULL;
             pos->siblings = child_node;
             pos = pos->siblings;
         }
+        free(tok);
     }
+    /* we only filled-in the_node->siblings, so we have to free the_node and
+     * return the list starting at the_node->siblings */
+    child_node = the_node;
+    the_node = the_node->siblings;
+    free(child_node);
     return the_node;
 }
 
