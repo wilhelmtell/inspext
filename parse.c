@@ -154,8 +154,8 @@ static node* parse_nl(FILE* is, lex_state* lstate, parse_state* pstate)
 /* TODO: implement */
 static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
 {
-    node *the_node, *child_node, *pos, *tmp;
-    token* tok;
+    node *the_node, *child_node, *pos;
+    token* tok, *tmpt;
 
     child_node = parse_nl(is, lstate, pstate);
     if( child_node == NULL )
@@ -168,77 +168,49 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
     else
         free_node(child_node);
     while( 1 ) {
-        /* FIXME: handle character parsing errors, cleanup */
         tok = sip(is, lstate, pstate);
-        child_node = (node*)malloc(sizeof(node));
-        child_node->ch = tok->ch;
-        child_node->children = child_node->siblings = NULL;
-        child_node->type = CHARACTER_NODE;
-        if( child_node == NULL )
-            return NULL;
-        else if( child_node->ch != '\n' ) {
-            tok = (token*)malloc(sizeof(token));
-            tok->type = CHARACTER_TOKEN;
-            tok->ch = child_node->ch;
+        if( tok->type != CHARACTER_TOKEN || tok->ch != '\n' ) {
             putback(tok, pstate);
-            free_node(child_node);
             break;
         }
-        free_node(child_node);
     }
     /* FIXME: paragraph node as one string */
     the_node = (node*)malloc(sizeof(node));
     the_node->siblings = NULL;
-    the_node->children = (node*)malloc(sizeof(node*));
+    the_node->children = (node*)malloc(sizeof(node));
     pos = the_node->children;
     pos->children = pos->siblings = NULL;
     while( 1 ) {
         /* FIXME: handle character parsing errors, cleanup */
         tok = sip(is, lstate, pstate);
-        child_node = (node*)malloc(sizeof(node));
-        child_node->ch = tok->ch;
-        child_node->children = child_node->siblings = NULL;
-        child_node->type = CHARACTER_NODE;
-        if( child_node == NULL ) {
-            free_node(the_node);
-            return NULL;
-        }
-        else if( child_node->type == END_NODE ) {
-            tok = (token*)malloc(sizeof(token));
-            tok->type = END_TOKEN;
+        if( tok->type == END_TOKEN ) {
             putback(tok, pstate);
             break;
         }
-        else if( child_node->type == CHARACTER_NODE && child_node->ch == '\n' ) {
-            tmp = child_node;
+        else if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
             /* FIXME: handle character parsing errors, parsing */
-            tok = sip(is, lstate, pstate);
+            tmpt = sip(is, lstate, pstate);
+            if( tmpt->type == CHARACTER_TOKEN && tmpt->ch == '\n' ) {
+                putback(tmpt, pstate);
+                putback(tok, pstate);
+                break;
+            } else {
+                putback(tmpt, pstate);
+                child_node = (node*)malloc(sizeof(node));
+                child_node->ch = tok->ch;
+                child_node->children = child_node->siblings = NULL;
+                child_node->type = CHARACTER_NODE;
+            }
+        } else if( tok->type == CHARACTER_TOKEN && tok->ch != '\n' ) {
             child_node = (node*)malloc(sizeof(node));
             child_node->ch = tok->ch;
             child_node->children = child_node->siblings = NULL;
             child_node->type = CHARACTER_NODE;
-            if( child_node->type == CHARACTER_NODE && child_node->ch == '\n' ) {
-                tok = (token*)malloc(sizeof(token));
-                tok->type = CHARACTER_TOKEN;
-                tok->ch = '\n';
-                putback(tok, pstate);
-                tok = (token*)malloc(sizeof(token));
-                tok->type = CHARACTER_TOKEN;
-                tok->ch = '\n';
-                putback(tok, pstate);
-                free_node(child_node);
-                free_node(tmp);
-                break;
-            } else {
-                tok = (token*)malloc(sizeof(token));
-                tok->type = CHARACTER_TOKEN;
-                tok->ch = '\n';
-                putback(tok, pstate);
-                free_node(child_node);
-            }
-            child_node = tmp;
             pos->children = child_node;
             pos = pos->children;
+        } else if( tok->type != CHARACTER_TOKEN ) {
+            fprintf(stderr, "ERROR:Unexpected token %s", token_s(tok->type));
+            return NULL;
         }
     }
     return the_node;
