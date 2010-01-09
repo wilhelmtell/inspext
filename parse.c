@@ -1,6 +1,7 @@
 #include "parse.h"
 #include "scan.h"
 #include <stdlib.h>
+#include <assert.h>
 
 /* TODO: get rid of this when done */
 static char* token_s(enum token_type t)
@@ -137,45 +138,20 @@ static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
     return the_node;
 }
 
-/* TODO: get rid of this fn.  NL is a terminal */
-static node* parse_nl(FILE* is, lex_state* lstate, parse_state* pstate)
-{
-    node* the_node;
-    token* tok;
-
-    /* FIXME: handle character parsing errors, cleanup */
-    tok = sip(is, lstate, pstate);
-    the_node = (node*)malloc(sizeof(node));
-    the_node->ch = tok->ch;
-    the_node->children = the_node->siblings = NULL;
-    the_node->type = CHARACTER_NODE;
-    if( the_node->ch != '\n' ) {
-        tok = (token*)malloc(sizeof(token));
-        tok->type = CHARACTER_TOKEN;
-        tok->ch = the_node->ch;
-        fprintf(stderr, "ERROR:Expected newline, found '%c'\n", the_node->ch);
-        putback(tok, pstate);
-        return NULL;
-    }
-    return the_node;
-}
-
 /* TODO: implement */
 static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     node *the_node, *child_node, *pos;
     token* tok, *tmpt;
 
-    child_node = parse_nl(is, lstate, pstate);
-    if( child_node == NULL )
-        return NULL;
-    else
-        free_node(child_node);
-    child_node = parse_nl(is, lstate, pstate);
-    if( child_node == NULL )
-        return NULL;
-    else
-        free_node(child_node);
+    tok = sip(is, lstate, pstate);
+    assert(tok->type == CHARACTER_TOKEN);
+    assert(tok->ch == '\n');
+    free(tok);
+    tok = sip(is, lstate, pstate);
+    assert(tok->type == CHARACTER_TOKEN);
+    assert(tok->ch == '\n');
+    free(tok);
     while( 1 ) {
         tok = sip(is, lstate, pstate);
         if( tok->type != CHARACTER_TOKEN || tok->ch != '\n' ) {
