@@ -60,6 +60,9 @@ token* scan(FILE* is, lex_state* state)
         } else if( state->indenting ) { /* not beginning_of_line */
             tok->type = INDENT_TOKEN;
             state->previous_token = INDENT_TOKEN;
+        } else { /* not beginning_of_line, not indenting */
+            tok->type = CHARACTER_TOKEN;
+            tok->ch = ch;
         }
     } else if( ch == '\n' ) {
         state->beginning_of_line = 1;
