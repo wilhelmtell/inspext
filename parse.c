@@ -10,6 +10,7 @@ static char* token_s(enum token_type t)
     else if( t == PARAGRAPH_TOKEN ) return "PARAGRAPH";
     else if( t == INDENT_TOKEN ) return "INDENT";
     else if( t == END_TOKEN ) return "END";
+    else if( t == UNDEFINED_TOKEN ) return "UNDEFINED";
     else return "DONNO";
 }
 
