@@ -164,10 +164,8 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
     the_node = (node*)malloc(sizeof(node));
     the_node->type = PARAGRAPH_NODE;
     the_node->ch = 0;
-    the_node->siblings = NULL;
-    the_node->children = (node*)malloc(sizeof(node));
-    pos = the_node->children;
-    pos->children = pos->siblings = NULL;
+    the_node->children = the_node->siblings = NULL;
+    pos = the_node;
     while( 1 ) {
         /* FIXME: handle character parsing errors, cleanup */
         tok = sip(is, lstate, pstate);
