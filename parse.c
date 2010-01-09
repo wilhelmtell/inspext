@@ -131,6 +131,7 @@ static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
 
     for(i = 0; i < lstate->heading_level; ++i )
         free_node(parse_indent(is, lstate, pstate));
+    the_node = (node*)malloc(sizeof(node));
     the_node->type = HEADING_NODE;
     the_node->ch = 0;
     the_node->siblings = NULL;
@@ -233,6 +234,8 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
             free(tok);
             return the_node; /* FIXME: abort on unexpected token?! */
         }
+        /* FIXME: if children is a long list then we overwrite here everything
+         * after the head of the list */
         pos->children = child_node;
         pos = pos->children;
         free(tok);
