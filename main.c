@@ -35,10 +35,12 @@ int main(int argc, char* argv[])
     file = opts.input_files;
     while( file != NULL ) {
         lstate.filename = file->filename;
-        while( ! feof(file->stream) ) {
-            rep = parse_text(file->stream, &lstate, &pstate);
-            free(rep);
-        }
+        if( file->stream != NULL )
+            while( ! feof(file->stream) ) {
+                rep = parse_text(file->stream, &lstate, &pstate);
+                /* FIXME: free rep */
+                /* free_node(rep); */
+            }
         if( file->stream != stdin ) fclose(file->stream);
         free(file->filename);
         tmp_file = file;
