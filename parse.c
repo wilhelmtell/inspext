@@ -121,12 +121,15 @@ static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstat
 static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     int i = 0;
-    node* child_node;
+    node* the_node;
 
     for(i = 0; i < lstate->heading_level; ++i )
         free_node(parse_indent(is, lstate, pstate));
-    child_node = parse_indented_text(is, lstate, pstate);
-    return child_node;
+    the_node->type = HEADING_NODE;
+    the_node->ch = 0;
+    the_node->siblings = NULL;
+    the_node->children = parse_indented_text(is, lstate, pstate);
+    return the_node;
 }
 
 /* TODO: get rid of this fn.  NL is a terminal */
@@ -174,9 +177,12 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
             putback(tok, pstate);
             break;
         }
+        free(tok);
     }
     /* FIXME: paragraph node as one string */
     the_node = (node*)malloc(sizeof(node));
+    the_node->type = PARAGRAPH_NODE;
+    the_node->ch = 0;
     the_node->siblings = NULL;
     the_node->children = (node*)malloc(sizeof(node));
     pos = the_node->children;
@@ -223,7 +229,7 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
 node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     token* tok = NULL;
-    node *the_node = NULL, *child_node = NULL;
+    node *the_node, *child_node, *pos;
 
     the_node = (node*)malloc(sizeof(node));
     the_node->type = TEXT_NODE;
@@ -238,6 +244,10 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
         } else if( tok->type == PARAGRAPH_TOKEN ) {
             child_node = parse_paragraph(is, lstate, pstate);
         } else if( tok->type == END_TOKEN ) { /* nothin */
+            child_node = (node*)malloc(sizeof(node));
+            child_node->type = END_NODE;
+            child_node->ch = 0;
+            child_node->children = child_node->siblings = NULL;
         } else {
             fprintf(stderr, "%s:%d:Unexpected token %s\n",
                     lstate->filename, lstate->lineno, token_s(tok->type));
