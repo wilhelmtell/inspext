@@ -92,7 +92,8 @@ static node* parse_indented_text(FILE* is, lex_state* lstate, parse_state* pstat
             putback(tok, pstate);
             break;
         } else if( tok->type != CHARACTER_TOKEN ) {
-            fprintf(stderr, "ERROR:Unexpected token %s\n", token_s(tok->type));
+            fprintf(stderr, "%s:%d:Unexpected token %s\n",
+                    lstate->filename, lstate->lineno, token_s(tok->type));
             /* FIXME: handle error properly */
             free_node(the_node);
             return NULL;
@@ -209,7 +210,9 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
             pos->children = child_node;
             pos = pos->children;
         } else if( tok->type != CHARACTER_TOKEN ) {
-            fprintf(stderr, "ERROR:Unexpected token %s", token_s(tok->type));
+            fprintf(stderr, "%s:%d:Unexpected token %s\n",
+                    lstate->filename, lstate->lineno, token_s(tok->type));
+            free(tok);
             return NULL;
         }
     }
