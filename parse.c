@@ -241,8 +241,6 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
         pos->siblings = child_node;
         while( pos->siblings != NULL )
             pos = pos->siblings;
-        /* pos->children = child_node;
-         pos = pos->children; */
         free(tok);
     } while( tok->type != END_TOKEN );
     pos = the_node->children;
