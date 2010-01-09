@@ -215,8 +215,9 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
 
     the_node = (node*)malloc(sizeof(node));
     the_node->type = TEXT_NODE;
-    the_node->children = the_node->siblings = NULL;
-    pos = the_node;
+    the_node->siblings = NULL;
+    the_node->children = (node*)malloc(sizeof(node));
+    pos = the_node->children;
     do {
         tok = sip(is, lstate, pstate);
         if( tok->type == HEADING_TOKEN ) {
@@ -235,10 +236,17 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
             return the_node; /* FIXME: abort on unexpected token?! */
         }
         /* FIXME: if children is a long list then we overwrite here everything
-         * after the head of the list */
-        pos->children = child_node;
-        pos = pos->children;
+         * after the head of the list. the following loop will do but is slow.
+         * maybe add tail to node and maintain that? */
+        pos->siblings = child_node;
+        while( pos->siblings != NULL )
+            pos = pos->siblings;
+        /* pos->children = child_node;
+         pos = pos->children; */
         free(tok);
     } while( tok->type != END_TOKEN );
+    pos = the_node->children;
+    the_node->children = pos->siblings;
+    free(pos);
     return the_node;
 }
