@@ -207,20 +207,22 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
                 child_node->ch = tok->ch;
                 child_node->children = child_node->siblings = NULL;
                 child_node->type = CHARACTER_NODE;
+                free(tok);
             }
         } else if( tok->type == CHARACTER_TOKEN && tok->ch != '\n' ) {
             child_node = (node*)malloc(sizeof(node));
             child_node->ch = tok->ch;
             child_node->children = child_node->siblings = NULL;
             child_node->type = CHARACTER_NODE;
-            pos->children = child_node;
-            pos = pos->children;
+            free(tok);
         } else if( tok->type != CHARACTER_TOKEN ) {
             fprintf(stderr, "%s:%d:Unexpected token %s\n",
                     lstate->filename, lstate->lineno, token_s(tok->type));
             free(tok);
             return NULL;
         }
+        pos->siblings = child_node;
+        pos = pos->siblings;
     }
     return the_node;
 }
@@ -233,14 +235,12 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
 
     the_node = (node*)malloc(sizeof(node));
     the_node->type = TEXT_NODE;
-    the_node->children = (node*)malloc(sizeof(node));
-    the_node->siblings = NULL;
+    the_node->children = the_node->siblings = NULL;
+    pos = the_node;
     do {
         tok = sip(is, lstate, pstate);
         if( tok->type == HEADING_TOKEN ) {
-            the_node->children->siblings = (node*)malloc(sizeof(node));
             child_node = parse_heading(is, lstate, pstate);
-            the_node->children = child_node;
         } else if( tok->type == PARAGRAPH_TOKEN ) {
             child_node = parse_paragraph(is, lstate, pstate);
         } else if( tok->type == END_TOKEN ) { /* nothin */
@@ -251,9 +251,11 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
         } else {
             fprintf(stderr, "%s:%d:Unexpected token %s\n",
                     lstate->filename, lstate->lineno, token_s(tok->type));
-            free_node(the_node->children);
-            the_node->children = NULL;
+            free(tok);
+            return the_node; /* FIXME: abort on unexpected token?! */
         }
+        pos->children = child_node;
+        pos = pos->children;
         free(tok);
     } while( tok->type != END_TOKEN );
     return the_node;
