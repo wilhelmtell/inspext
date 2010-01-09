@@ -90,3 +90,14 @@ token* scan(FILE* is, lex_state* state)
     }
     return tok;
 }
+
+token* peek(FILE* is, lex_state* state)
+{
+    token* tok;
+
+    /* TODO: maintain token buf as opposed to char buf */
+    /*       this so i dont need to scan the same token twice */
+    tok = scan(is, state);
+    putback(tok->ch, state);
+    return tok;
+}

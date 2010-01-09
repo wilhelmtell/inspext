@@ -21,5 +21,6 @@ typedef struct lex_state {
 } lex_state;
 
 token* scan(FILE* is, lex_state* state);
+token* peek(FILE* is, lex_state* state);
 
 #endif // SCAN_H_
