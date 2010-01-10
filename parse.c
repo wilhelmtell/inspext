@@ -229,7 +229,7 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
             child_node->type = END_NODE;
             child_node->ch = 0;
             child_node->children = child_node->siblings = NULL;
-        } else {
+        } else { /* FIXME: allow non-paragraph text without heading */
             fprintf(stderr, "%s:%d:Unexpected token %s\n",
                     lstate->filename, lstate->lineno, token_s(tok->type));
             free(tok);
