@@ -2,6 +2,7 @@
 #define OPTIONS_H_
 
 #include <stdio.h>
+#include "parse.h"
 
 typedef struct input_file {
     FILE* stream;
@@ -10,7 +11,7 @@ typedef struct input_file {
 } input_file;
 
 typedef struct conf {
-    enum { PLAINTEXT_TARGET, LATEX_TARGET, UNDEFINED_TARGET } target;
+    void (*gen)(FILE*,node*);
     struct input_file* input_files;
 } conf;
 

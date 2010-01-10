@@ -3,9 +3,12 @@
 #include <getopt.h>
 #include <stdio.h>
 #include "options.h"
+#include "gen_plain.h"
 
 void print_usage()
 {
+    /* TODO: add option output file (stdout by default?) */
+    /* TODO: add option verbosity */
     printf("Usage: inspec [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
             "                    [plaintext, latex]\n"
@@ -17,7 +20,7 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     int c, success_flag = 1;
     input_file* file, *pos;
     const char * const plaintext = "plaintext";
-    const char * const latex = "latex";
+    /* const char * const latex = "latex"; */
     const char * filename;
     int filename_len = 0;
     while( 1 ) {
@@ -37,10 +40,15 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             break;
         case 't':
             optarg_len = strlen(optarg);
-            if( strstr(plaintext, optarg) == plaintext )
-                opts->target = PLAINTEXT_TARGET;
-            else if( strstr(latex, optarg) == latex )
-                opts->target = LATEX_TARGET;
+            if( strstr(plaintext, optarg) == plaintext ) {
+                opts->gen = &gen_plain;
+            /* } else if( strstr(latex, optarg) == latex ) { */
+                /* opts->gen = &gen_latex; */
+            } else {
+                fprintf(stderr, "ERROR:Unrecognized target %s\n", optarg);
+                success_flag = 0;
+                opts->gen = NULL;
+            }
             break;
         case '?':
             success_flag = 0;

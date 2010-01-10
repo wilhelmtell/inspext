@@ -11,7 +11,7 @@ static int sanity(conf* opts)
                );
         return 0;
     }
-    if( opts->target == UNDEFINED_TARGET ) {
+    if( opts->gen == NULL ) {
         fprintf(stderr,
                 "ERROR:Please specify a valid target to compile to.\n"
                 "      Available targets: [plaintext, latex]\n"
@@ -23,7 +23,7 @@ static int sanity(conf* opts)
 
 int main(int argc, char* argv[])
 {
-    conf opts = { UNDEFINED_TARGET, NULL };
+    conf opts = { NULL, NULL };
     lex_state lstate = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL, NULL };
     node* rep;
     input_file *file, *tmp_file;
@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
         lstate.filename = file->filename;
         while( ! feof(file->stream) ) {
             rep = parse_text(file->stream, &lstate);
+            opts.gen(stdout, rep);
             free_node(rep);
         }
         if( file->stream != stdin ) fclose(file->stream);
