@@ -172,11 +172,7 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
     while( 1 ) {
         /* FIXME: handle character parsing errors, cleanup */
         tok = sip(is, lstate, pstate);
-        if( tok->type == END_TOKEN ) {
-            putback(tok, pstate);
-            break;
-        }
-        else if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
+        if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
             /* FIXME: handle character parsing errors, parsing */
             tmpt = sip(is, lstate, pstate);
             if( tmpt->type == CHARACTER_TOKEN && tmpt->ch == '\n' ) {
@@ -198,10 +194,8 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
             child_node->type = CHARACTER_NODE;
             free(tok);
         } else if( tok->type != CHARACTER_TOKEN ) {
-            fprintf(stderr, "%s:%d:Unexpected token %s\n",
-                    lstate->filename, lstate->lineno, token_s(tok->type));
-            free(tok);
-            return NULL;
+            putback(tok, pstate);
+            break;
         }
         pos->siblings = child_node;
         pos = pos->siblings;
