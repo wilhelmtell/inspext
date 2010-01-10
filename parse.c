@@ -59,12 +59,19 @@ void free_node(node* n)
     free(n);
 }
 
-/* TODO: implement */
 static node* parse_indent(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     token* tok;
+    node* the_node;
+
     tok = sip(is, lstate, pstate);
-    return NULL;
+    the_node = (node*)malloc(sizeof(node));
+    the_node->ch = 0;
+    the_node->heading_level = 0;
+    the_node->type = INDENT_NODE;
+    the_node->children = the_node->siblings = NULL;
+    free(tok);
+    return the_node;
 }
 
 /* FIXME: return the entire heading as a single string */

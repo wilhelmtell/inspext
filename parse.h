@@ -8,6 +8,7 @@ typedef struct node {
     enum {
         TEXT_NODE,
         HEADING_NODE,
+        INDENT_NODE,
         PARAGRAPH_NODE,
         CHARACTER_NODE,
         END_NODE
