@@ -24,8 +24,7 @@ static int sanity(conf* opts)
 int main(int argc, char* argv[])
 {
     conf opts = { UNDEFINED_TARGET, NULL };
-    lex_state lstate = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL };
-    parse_state pstate = { NULL };
+    lex_state lstate = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL, NULL };
     node* rep;
     input_file *file, *tmp_file;
 
@@ -38,9 +37,8 @@ int main(int argc, char* argv[])
     while( file != NULL ) {
         lstate.filename = file->filename;
         while( ! feof(file->stream) ) {
-            rep = parse_text(file->stream, &lstate, &pstate);
-            /* FIXME: free rep */
-            /* free_node(rep); */
+            rep = parse_text(file->stream, &lstate);
+            free_node(rep);
         }
         if( file->stream != stdin ) fclose(file->stream);
         free(file->filename);

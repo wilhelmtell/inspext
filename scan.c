@@ -2,7 +2,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void putback(int ch, lex_state* state)
+void putback(token* tok, lex_state* lstate)
+{
+    token_buf_t* tmp;
+
+    tmp = lstate->token_buf;
+    lstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
+    lstate->token_buf->tok = tok;
+    lstate->token_buf->next = tmp;
+}
+
+token* sip(FILE* is, lex_state* lstate)
+{
+    token_buf_t* tmp;
+    token* tok;
+
+    /* FIXME: report error when NULL */
+    if( lstate->token_buf != NULL ) {
+        tmp = lstate->token_buf;
+        tok = lstate->token_buf->tok;
+        lstate->token_buf = lstate->token_buf->next;
+        free(tmp);
+    } else {
+        tok = scan(is, lstate);
+    }
+    return tok;
+}
+
+
+static void putbackc(int ch, lex_state* state)
 {
     /* FIXME: check for NULL */
     stream_buf_t* tmp = state->stream_buf;
@@ -12,7 +40,7 @@ static void putback(int ch, lex_state* state)
     state->stream_buf->next = tmp;
 }
 
-static int sip(FILE* is, lex_state* state)
+static int cipc(FILE* is, lex_state* state)
 {
     stream_buf_t* tmp;
     int ch;
@@ -35,7 +63,7 @@ token* scan(FILE* is, lex_state* state)
     int i;
     token* tok;
 
-    ch = sip(is, state);
+    ch = cipc(is, state);
     tok = (token*)malloc(sizeof(token));
     if( ch == EOF ) {
         tok->type = END_TOKEN;
@@ -43,11 +71,11 @@ token* scan(FILE* is, lex_state* state)
         if( state->beginning_of_line ) {
             /* verify it's a heading */
             for( i = 0; ch == ' '; ++i ) { /* is there text after indent? */
-                ch = sip(is, state);
+                ch = cipc(is, state);
             }
-            putback(ch, state);
+            putbackc(ch, state);
             while( --i > 0 ) {
-                putback(' ', state);
+                putbackc(' ', state);
             }
             if( ch == EOF || ch == '\n' ) { /* no heading */
                 tok->type = CHARACTER_TOKEN;
@@ -62,16 +90,16 @@ token* scan(FILE* is, lex_state* state)
                 state->indenting = 1;
                 state->beginning_of_line = 0;
                 for( i = 0; ch == ' '; ++i ) { /* calculate level */
-                    ch = sip(is, state);
+                    ch = cipc(is, state);
                 }
                 if( i > state->heading_level )
                     i = ++state->heading_level;
                 else /* FIXME: trap inconsistent indents */
                     state->heading_level = i;
                 tok->heading_level = i;
-                putback(ch, state);
-                while( i-- > 0 ) { /* restore input: putback indent */
-                    putback(' ', state);
+                putbackc(ch, state);
+                while( i-- > 0 ) { /* restore input: putbackc indent */
+                    putbackc(' ', state);
                 }
             }
         } else if( state->indenting ) { /* not beginning_of_line */
@@ -84,15 +112,15 @@ token* scan(FILE* is, lex_state* state)
     } else if( ch == '\n' ) {
         state->beginning_of_line = 1;
         state->indenting = 0;
-        ch = sip(is, state);
+        ch = cipc(is, state);
         if( ch == '\n' && ! state->paragraph_separator ) {
-            putback('\n', state);
-            putback('\n', state);
+            putbackc('\n', state);
+            putbackc('\n', state);
             tok->type = PARAGRAPH_TOKEN;
             state->previous_token = PARAGRAPH_TOKEN;
             state->paragraph_separator = 1;
         } else { /* FIXME: treat lines with only whitespace as empty lines */
-            putback(ch, state);
+            putbackc(ch, state);
             ++state->lineno;
             tok->type = CHARACTER_TOKEN;
             state->previous_token = CHARACTER_TOKEN;
