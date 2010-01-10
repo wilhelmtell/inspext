@@ -133,6 +133,7 @@ static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
         free_node(parse_indent(is, lstate, pstate));
     the_node = (node*)malloc(sizeof(node));
     the_node->type = HEADING_NODE;
+    the_node->heading_level = i; /* FIXME: token already holds level */
     the_node->ch = 0;
     the_node->siblings = NULL;
     the_node->children = parse_indented_text(is, lstate, pstate);
