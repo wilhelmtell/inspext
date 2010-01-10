@@ -15,6 +15,7 @@ typedef struct node {
     struct node* children;
     struct node* siblings;
     char ch;
+    int heading_level;
 } node;
 
 typedef struct token_buf_t {

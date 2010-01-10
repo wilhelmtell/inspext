@@ -24,12 +24,6 @@ static void putback(token* tok, parse_state* pstate)
     pstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
     pstate->token_buf->tok = tok;
     pstate->token_buf->next = tmp;
-    printf("Put back token %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN ) {
-        if( tok->ch == '\n' ) printf(" NL");
-        else printf(" '%c'", tok->ch);
-    }
-    printf("\n");
 }
 
 /* TODO: this functionality should be in scan.c */
@@ -47,12 +41,6 @@ static token* sip(FILE* is, lex_state* lstate, parse_state* pstate)
     } else {
         tok = scan(is, lstate);
     }
-    printf("Got token %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN ) {
-        if( tok->ch == '\n' ) printf(" NL");
-        else printf(" '%c'", tok->ch);
-    }
-    printf("\n");
     return tok;
 }
 
@@ -133,6 +121,7 @@ static node* parse_heading(FILE* is, lex_state* lstate, parse_state* pstate)
         free_node(parse_indent(is, lstate, pstate));
     the_node = (node*)malloc(sizeof(node));
     the_node->type = HEADING_NODE;
+    the_node->heading_level = i; /* FIXME: token already holds level */
     the_node->ch = 0;
     the_node->siblings = NULL;
     the_node->children = parse_indented_text(is, lstate, pstate);
@@ -165,16 +154,13 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
     the_node = (node*)malloc(sizeof(node));
     the_node->type = PARAGRAPH_NODE;
     the_node->ch = 0;
-    the_node->children = the_node->siblings = NULL;
-    pos = the_node;
+    the_node->siblings = NULL;
+    the_node->children = (node*)malloc(sizeof(node));
+    pos = the_node->children;
     while( 1 ) {
         /* FIXME: handle character parsing errors, cleanup */
         tok = sip(is, lstate, pstate);
-        if( tok->type == END_TOKEN ) {
-            putback(tok, pstate);
-            break;
-        }
-        else if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
+        if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
             /* FIXME: handle character parsing errors, parsing */
             tmpt = sip(is, lstate, pstate);
             if( tmpt->type == CHARACTER_TOKEN && tmpt->ch == '\n' ) {
@@ -196,14 +182,15 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
             child_node->type = CHARACTER_NODE;
             free(tok);
         } else if( tok->type != CHARACTER_TOKEN ) {
-            fprintf(stderr, "%s:%d:Unexpected token %s\n",
-                    lstate->filename, lstate->lineno, token_s(tok->type));
-            free(tok);
-            return NULL;
+            putback(tok, pstate);
+            break;
         }
         pos->siblings = child_node;
         pos = pos->siblings;
     }
+    pos = the_node->children;
+    the_node->children = the_node->children->siblings;
+    free(pos);
     return the_node;
 }
 
@@ -229,20 +216,18 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
             child_node->type = END_NODE;
             child_node->ch = 0;
             child_node->children = child_node->siblings = NULL;
-        } else {
+        } else { /* FIXME: allow non-paragraph text without heading */
             fprintf(stderr, "%s:%d:Unexpected token %s\n",
                     lstate->filename, lstate->lineno, token_s(tok->type));
             free(tok);
             return the_node; /* FIXME: abort on unexpected token?! */
         }
-        /* FIXME: if children is a long list then we overwrite here everything
+        /* FIXME: if children is a long list then here we overwrite everything
          * after the head of the list. the following loop will do but is slow.
          * maybe add tail to node and maintain that? */
         pos->siblings = child_node;
         while( pos->siblings != NULL )
             pos = pos->siblings;
-        /* pos->children = child_node;
-         pos = pos->children; */
         free(tok);
     } while( tok->type != END_TOKEN );
     pos = the_node->children;

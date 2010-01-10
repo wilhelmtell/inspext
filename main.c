@@ -33,14 +33,15 @@ int main(int argc, char* argv[])
     if( !parse_cl_opts(argc, argv, &opts) || !sanity(&opts) )
         return EXIT_FAILURE;
     file = opts.input_files;
+    if( file == NULL )
+        return EXIT_FAILURE;
     while( file != NULL ) {
         lstate.filename = file->filename;
-        if( file->stream != NULL )
-            while( ! feof(file->stream) ) {
-                rep = parse_text(file->stream, &lstate, &pstate);
-                /* FIXME: free rep */
-                /* free_node(rep); */
-            }
+        while( ! feof(file->stream) ) {
+            rep = parse_text(file->stream, &lstate, &pstate);
+            /* FIXME: free rep */
+            /* free_node(rep); */
+        }
         if( file->stream != stdin ) fclose(file->stream);
         free(file->filename);
         tmp_file = file;
