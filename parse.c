@@ -24,12 +24,6 @@ static void putback(token* tok, parse_state* pstate)
     pstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
     pstate->token_buf->tok = tok;
     pstate->token_buf->next = tmp;
-    printf("Put back token %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN ) {
-        if( tok->ch == '\n' ) printf(" NL");
-        else printf(" '%c'", tok->ch);
-    }
-    printf("\n");
 }
 
 /* TODO: this functionality should be in scan.c */
@@ -47,12 +41,6 @@ static token* sip(FILE* is, lex_state* lstate, parse_state* pstate)
     } else {
         tok = scan(is, lstate);
     }
-    printf("Got token %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN ) {
-        if( tok->ch == '\n' ) printf(" NL");
-        else printf(" '%c'", tok->ch);
-    }
-    printf("\n");
     return tok;
 }
 
