@@ -235,7 +235,7 @@ node* parse_text(FILE* is, lex_state* lstate, parse_state* pstate)
             free(tok);
             return the_node; /* FIXME: abort on unexpected token?! */
         }
-        /* FIXME: if children is a long list then we overwrite here everything
+        /* FIXME: if children is a long list then here we overwrite everything
          * after the head of the list. the following loop will do but is slow.
          * maybe add tail to node and maintain that? */
         pos->siblings = child_node;

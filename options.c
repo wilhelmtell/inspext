@@ -15,7 +15,7 @@ void print_usage()
 int parse_cl_opts(int argc, char* argv[], conf* opts)
 {
     int c, success_flag = 1;
-    input_file* file = NULL;
+    input_file* file, *pos;
     const char * const plaintext = "plaintext";
     const char * const latex = "latex";
     const char * filename;
@@ -49,24 +49,34 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             abort();
         }
     }
+    opts->input_files = (input_file*)malloc(sizeof(input_file));
+    opts->input_files->next = NULL;
+    opts->input_files->filename = NULL;
+    opts->input_files->stream = NULL;
+    pos = opts->input_files;
     while( optind < argc ) { /* files to compile */
         filename = argv[optind];
         filename_len = strlen(filename);
-        file = opts->input_files;
-        opts->input_files = (input_file*)malloc(sizeof(input_file));
-        opts->input_files->filename = (char*)malloc(filename_len+1);
-        strncpy(opts->input_files->filename, filename, filename_len);
+        file = (input_file*)malloc(sizeof(input_file));
+        file->filename = (char*)malloc(filename_len+1);
+        strncpy(file->filename, filename, filename_len);
         if( strncmp(filename, "-", filename_len) == 0 ) {
-            opts->input_files->stream = stdin;
+            file->stream = stdin;
         } else {
-            opts->input_files->stream = fopen(filename, "r");
-            if( opts->input_files->stream == NULL ) {
-                fprintf(stderr, "ERROR:Can't open file %s\n", filename);
-                success_flag = 0;
+            file->stream = fopen(filename, "r");
+            if( file->stream == NULL ) {
+                fprintf(stderr, "ERROR:Can't open file %s for reading\n", filename);
+                success_flag = 0; /* FIXME: error when can't open file? */
             }
         }
         ++optind;
-        opts->input_files->next = file;
+        if( file->stream != NULL ) {
+            pos->next = file;
+            pos = pos->next;
+        }
     }
+    pos = opts->input_files;
+    opts->input_files = opts->input_files->next;
+    free(pos);
     return success_flag;
 }
