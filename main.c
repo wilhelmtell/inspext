@@ -23,7 +23,7 @@ static int sanity(conf* opts)
 
 int main(int argc, char* argv[])
 {
-    conf opts = { UNDEFINED_TARGET, NULL };
+    conf opts = { NULL, NULL };
     lex_state lstate = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL };
     parse_state pstate = { NULL };
     node* rep;
