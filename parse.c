@@ -3,16 +3,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
-/* TODO: get rid of this when done */
 static char* token_s(enum token_type t)
 {
-    if( t == HEADING_TOKEN ) return "HEADING";
-    else if( t == CHARACTER_TOKEN ) return "CHARACTER";
-    else if( t == PARAGRAPH_TOKEN ) return "PARAGRAPH";
-    else if( t == INDENT_TOKEN ) return "INDENT";
-    else if( t == END_TOKEN ) return "END";
-    else if( t == UNDEFINED_TOKEN ) return "UNDEFINED";
-    else return "DONNO";
+    if( t == HEADING_TOKEN ) return "HEADING_TOKEN";
+    else if( t == CHARACTER_TOKEN ) return "CHARACTER_TOKEN";
+    else if( t == PARAGRAPH_TOKEN ) return "PARAGRAPH_TOKEN";
+    else if( t == INDENT_TOKEN ) return "INDENT_TOKEN";
+    else if( t == END_TOKEN ) return "END_TOKEN";
+    else if( t == UNDEFINED_TOKEN ) return "UNDEFINED_TOKEN";
+    else return "illegal token";
 }
 
 void free_node(node* n)
@@ -32,12 +31,19 @@ void free_node(node* n)
     free(n);
 }
 
-/* TODO: implement */
-static node* parse_indent(FILE* is, lex_state* lstate)
+static node* parse_indent(FILE* is, lex_state* lstate, parse_state* pstate)
 {
     token* tok;
-    tok = scan(is, lstate);
-    return NULL;
+    node* the_node;
+
+    tok = sip(is, lstate, pstate);
+    the_node = (node*)malloc(sizeof(node));
+    the_node->ch = 0;
+    the_node->heading_level = 0;
+    the_node->type = INDENT_NODE;
+    the_node->children = the_node->siblings = NULL;
+    free(tok);
+    return the_node;
 }
 
 /* FIXME: return the entire heading as a single string */
