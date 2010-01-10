@@ -22,7 +22,7 @@ static void putbackc(int ch, lex_state* state)
     state->stream_buf->next = tmp;
 }
 
-static int cipc(FILE* is, lex_state* state)
+static int sipc(FILE* is, lex_state* state)
 {
     stream_buf_t* tmp;
     int ch;
@@ -45,7 +45,7 @@ static token* scan(FILE* is, lex_state* state)
     int i;
     token* tok;
 
-    ch = cipc(is, state);
+    ch = sipc(is, state);
     tok = (token*)malloc(sizeof(token));
     if( ch == EOF ) {
         tok->type = END_TOKEN;
@@ -53,7 +53,7 @@ static token* scan(FILE* is, lex_state* state)
         if( state->beginning_of_line ) {
             /* verify it's a heading */
             for( i = 0; ch == ' '; ++i ) { /* is there text after indent? */
-                ch = cipc(is, state);
+                ch = sipc(is, state);
             }
             putbackc(ch, state);
             while( --i > 0 ) {
@@ -72,7 +72,7 @@ static token* scan(FILE* is, lex_state* state)
                 state->indenting = 1;
                 state->beginning_of_line = 0;
                 for( i = 0; ch == ' '; ++i ) { /* calculate level */
-                    ch = cipc(is, state);
+                    ch = sipc(is, state);
                 }
                 if( i > state->heading_level )
                     i = ++state->heading_level;
@@ -80,7 +80,7 @@ static token* scan(FILE* is, lex_state* state)
                     state->heading_level = i;
                 tok->heading_level = i;
                 putbackc(ch, state);
-                while( i-- > 0 ) { /* restore input: putbackc indent */
+                while( i-- > 0 ) { /* restore input: putback indent */
                     putbackc(' ', state);
                 }
             }
@@ -94,7 +94,7 @@ static token* scan(FILE* is, lex_state* state)
     } else if( ch == '\n' ) {
         state->beginning_of_line = 1;
         state->indenting = 0;
-        ch = cipc(is, state);
+        ch = sipc(is, state);
         if( ch == '\n' && ! state->paragraph_separator ) {
             putbackc('\n', state);
             putbackc('\n', state);
