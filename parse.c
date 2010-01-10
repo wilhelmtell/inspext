@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-/* TODO: get rid of this when done */
 static char* token_s(enum token_type t)
 {
     if( t == HEADING_TOKEN ) return "HEADING_TOKEN";
@@ -32,7 +31,6 @@ static token* sip(FILE* is, lex_state* lstate, parse_state* pstate)
     token_buf_t* tmp;
     token* tok;
 
-    /* FIXME: report error when NULL */
     if( pstate->token_buf != NULL ) {
         tmp = pstate->token_buf;
         tok = pstate->token_buf->tok;
