@@ -45,17 +45,18 @@ token* scan(FILE* is, lex_state* state)
             for( i = 0; ch == ' '; ++i ) { /* is there text after indent? */
                 ch = sip(is, state);
             }
+            putback(ch, state);
+            while( --i > 0 ) {
+                putback(' ', state);
+            }
             if( ch == EOF || ch == '\n' ) { /* no heading */
-                putback(ch, state);
-                while( --i > 0 ) {
-                    putback(' ', state);
-                }
                 tok->type = CHARACTER_TOKEN;
                 tok->ch = ' ';
                 state->previous_token = CHARACTER_TOKEN;
                 state->indenting = 0;
                 state->beginning_of_line = 0;
             } else {
+                ch = ' '; /* was changed by heading validation */
                 tok->type = HEADING_TOKEN;
                 state->previous_token = HEADING_TOKEN;
                 state->indenting = 1;

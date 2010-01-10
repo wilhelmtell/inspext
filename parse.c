@@ -24,12 +24,6 @@ static void putback(token* tok, parse_state* pstate)
     pstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
     pstate->token_buf->tok = tok;
     pstate->token_buf->next = tmp;
-    printf("Put back token %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN ) {
-        if( tok->ch == '\n' ) printf(" NL");
-        else printf(" '%c'", tok->ch);
-    }
-    printf("\n");
 }
 
 /* TODO: this functionality should be in scan.c */
@@ -47,12 +41,6 @@ static token* sip(FILE* is, lex_state* lstate, parse_state* pstate)
     } else {
         tok = scan(is, lstate);
     }
-    printf("Got token %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN ) {
-        if( tok->ch == '\n' ) printf(" NL");
-        else printf(" '%c'", tok->ch);
-    }
-    printf("\n");
     return tok;
 }
 
@@ -172,11 +160,7 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
     while( 1 ) {
         /* FIXME: handle character parsing errors, cleanup */
         tok = sip(is, lstate, pstate);
-        if( tok->type == END_TOKEN ) {
-            putback(tok, pstate);
-            break;
-        }
-        else if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
+        if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
             /* FIXME: handle character parsing errors, parsing */
             tmpt = sip(is, lstate, pstate);
             if( tmpt->type == CHARACTER_TOKEN && tmpt->ch == '\n' ) {
@@ -198,10 +182,8 @@ static node* parse_paragraph(FILE* is, lex_state* lstate, parse_state* pstate)
             child_node->type = CHARACTER_NODE;
             free(tok);
         } else if( tok->type != CHARACTER_TOKEN ) {
-            fprintf(stderr, "%s:%d:Unexpected token %s\n",
-                    lstate->filename, lstate->lineno, token_s(tok->type));
-            free(tok);
-            return NULL;
+            putback(tok, pstate);
+            break;
         }
         pos->siblings = child_node;
         pos = pos->siblings;
