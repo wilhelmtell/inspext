@@ -31,12 +31,12 @@ void free_node(node* n)
     free(n);
 }
 
-static node* parse_indent(FILE* is, lex_state* lstate, parse_state* pstate)
+static node* parse_indent(FILE* is, lex_state* lstate)
 {
     token* tok;
     node* the_node;
 
-    tok = sip(is, lstate, pstate);
+    tok = scan(is, lstate);
     the_node = (node*)malloc(sizeof(node));
     the_node->ch = 0;
     the_node->heading_level = 0;
