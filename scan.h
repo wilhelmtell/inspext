@@ -26,12 +26,8 @@ typedef struct lex_state {
     token_buf_t* token_buf;
 } lex_state;
 
-token* scan(FILE* is, lex_state* state);
-<<<<<<< Updated upstream
 token* peek(FILE* is, lex_state* state);
-=======
 void putback(token* tok, lex_state* lstate);
 token* sip(FILE* is, lex_state* lstate);
->>>>>>> Stashed changes
 
 #endif // SCAN_H_

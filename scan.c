@@ -12,24 +12,6 @@ void putback(token* tok, lex_state* lstate)
     lstate->token_buf->next = tmp;
 }
 
-token* sip(FILE* is, lex_state* lstate)
-{
-    token_buf_t* tmp;
-    token* tok;
-
-    /* FIXME: report error when NULL */
-    if( lstate->token_buf != NULL ) {
-        tmp = lstate->token_buf;
-        tok = lstate->token_buf->tok;
-        lstate->token_buf = lstate->token_buf->next;
-        free(tmp);
-    } else {
-        tok = scan(is, lstate);
-    }
-    return tok;
-}
-
-
 static void putbackc(int ch, lex_state* state)
 {
     /* FIXME: check for NULL */
@@ -57,7 +39,7 @@ static int cipc(FILE* is, lex_state* state)
     return ch;
 }
 
-token* scan(FILE* is, lex_state* state)
+static token* scan(FILE* is, lex_state* state)
 {
     int ch;
     int i;
@@ -143,6 +125,23 @@ token* peek(FILE* is, lex_state* state)
     /* TODO: maintain token buf as opposed to char buf */
     /*       this so i dont need to scan the same token twice */
     tok = scan(is, state);
-    putback(tok->ch, state);
+    putbackc(tok->ch, state);
+    return tok;
+}
+
+token* sip(FILE* is, lex_state* lstate)
+{
+    token_buf_t* tmp;
+    token* tok;
+
+    /* FIXME: report error when NULL */
+    if( lstate->token_buf != NULL ) {
+        tmp = lstate->token_buf;
+        tok = lstate->token_buf->tok;
+        lstate->token_buf = lstate->token_buf->next;
+        free(tmp);
+    } else {
+        tok = scan(is, lstate);
+    }
     return tok;
 }
