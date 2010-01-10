@@ -36,7 +36,7 @@ void free_node(node* n)
 static node* parse_indent(FILE* is, lex_state* lstate)
 {
     token* tok;
-    tok = sip(is, lstate);
+    tok = scan(is, lstate);
     return NULL;
 }
 
@@ -50,7 +50,7 @@ static node* parse_indented_text(FILE* is, lex_state* lstate)
     the_node->children = the_node->siblings = NULL;
     pos = the_node;
     while( 1 ) {
-        tok = sip(is, lstate);
+        tok = scan(is, lstate);
         if( tok->type == PARAGRAPH_TOKEN ) { /* FIXME: END_TOKEN? */
             putback(tok, lstate);
             break;
@@ -105,16 +105,16 @@ static node* parse_paragraph(FILE* is, lex_state* lstate)
     node *the_node, *child_node, *pos;
     token* tok, *tmpt;
 
-    tok = sip(is, lstate);
+    tok = scan(is, lstate);
     assert(tok->type == CHARACTER_TOKEN);
     assert(tok->ch == '\n');
     free(tok);
-    tok = sip(is, lstate);
+    tok = scan(is, lstate);
     assert(tok->type == CHARACTER_TOKEN);
     assert(tok->ch == '\n');
     free(tok);
     while( 1 ) {
-        tok = sip(is, lstate);
+        tok = scan(is, lstate);
         if( tok->type != CHARACTER_TOKEN || tok->ch != '\n' ) {
             putback(tok, lstate);
             break;
@@ -130,10 +130,10 @@ static node* parse_paragraph(FILE* is, lex_state* lstate)
     pos = the_node->children;
     while( 1 ) {
         /* FIXME: handle character parsing errors, cleanup */
-        tok = sip(is, lstate);
+        tok = scan(is, lstate);
         if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' ) {
             /* FIXME: handle character parsing errors, parsing */
-            tmpt = sip(is, lstate);
+            tmpt = scan(is, lstate);
             if( tmpt->type == CHARACTER_TOKEN && tmpt->ch == '\n' ) {
                 putback(tmpt, lstate);
                 putback(tok, lstate);
@@ -177,7 +177,7 @@ node* parse_text(FILE* is, lex_state* lstate)
     the_node->children = (node*)malloc(sizeof(node));
     pos = the_node->children;
     do {
-        tok = sip(is, lstate);
+        tok = scan(is, lstate);
         if( tok->type == HEADING_TOKEN ) {
             child_node = parse_heading(is, lstate);
         } else if( tok->type == PARAGRAPH_TOKEN ) {

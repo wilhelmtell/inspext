@@ -22,6 +22,8 @@ static void putbackc(int ch, lex_state* state)
     state->stream_buf->next = tmp;
 }
 
+/* sip (get) a character from the state's buffer, or if the buffer is empty --
+ * from the given input stream. */
 static int sipc(FILE* is, lex_state* state)
 {
     stream_buf_t* tmp;
@@ -39,7 +41,7 @@ static int sipc(FILE* is, lex_state* state)
     return ch;
 }
 
-static token* scan(FILE* is, lex_state* state)
+static token* force_scan(FILE* is, lex_state* state)
 {
     int ch;
     int i;
@@ -124,12 +126,12 @@ token* peek(FILE* is, lex_state* state)
 
     /* TODO: maintain token buf as opposed to char buf */
     /*       this so i dont need to scan the same token twice */
-    tok = scan(is, state);
+    tok = force_scan(is, state);
     putbackc(tok->ch, state);
     return tok;
 }
 
-token* sip(FILE* is, lex_state* lstate)
+token* scan(FILE* is, lex_state* lstate)
 {
     token_buf_t* tmp;
     token* tok;
@@ -141,7 +143,7 @@ token* sip(FILE* is, lex_state* lstate)
         lstate->token_buf = lstate->token_buf->next;
         free(tmp);
     } else {
-        tok = scan(is, lstate);
+        tok = force_scan(is, lstate);
     }
     return tok;
 }
