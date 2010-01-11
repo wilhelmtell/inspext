@@ -13,6 +13,7 @@ typedef struct input_file {
 typedef struct conf {
     void (*gen)(FILE*,node*);
     struct input_file* input_files;
+    int verbose;
 } conf;
 
 void print_usage();

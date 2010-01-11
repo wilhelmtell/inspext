@@ -9,9 +9,10 @@ void print_usage()
 {
     /* TODO: add option output file (stdout by default?) */
     /* TODO: add option verbosity */
-    printf("Usage: inspec [options]\n\n"
+    printf(" Usage: inspec [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
             "                    [plaintext, latex]\n"
+            "-v, --verbose[=n]   Output some trace info\n"
             );
 }
 
@@ -23,20 +24,25 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     /* const char * const latex = "latex"; */
     const char * filename;
     int filename_len = 0;
+    char* number_end; /* for strtol() */
+    const int MAX_VERBOSE = 42; /* FIXME: what is a reasonable max? */
+
     while( 1 ) {
         static struct option long_options[] = {
             { "help", no_argument, 0, 'h' },
             { "target", required_argument, 0, 't' },
+            { "verbose", optional_argument, 0, 'v' },
             { 0, 0, 0, 0 }
         };
         int option_index = 0;
         int optarg_len = 0;
 
-        c = getopt_long(argc, argv, "ht:", long_options, &option_index);
+        c = getopt_long(argc, argv, "ht:v::", long_options, &option_index);
         if( c == -1 ) break;
         switch( c ) {
         case 'h':
             print_usage();
+            exit(0);
             break;
         case 't':
             optarg_len = strlen(optarg);
@@ -49,6 +55,21 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
                 success_flag = 0;
                 opts->gen = NULL;
             }
+            break;
+        case 'v':
+            if( optarg == NULL )
+                opts->verbose = 0;
+            else {
+                opts->verbose = strtol(optarg, &number_end, 10);
+                if( number_end == optarg ) { /* strtol() failed */
+                    optarg_len = strlen(optarg);
+                    opts->verbose = optarg_len;
+                }
+            }
+            if( opts->verbose > MAX_VERBOSE )
+                opts->verbose = MAX_VERBOSE;
+            else if( opts->verbose < 0 ) /* possible if strtol() worked */
+                opts->verbose = 0;
             break;
         case '?':
             success_flag = 0;
