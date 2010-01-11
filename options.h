@@ -13,7 +13,13 @@ typedef struct input_file {
 typedef struct conf {
     void (*gen)(FILE*,node*);
     struct input_file* input_files;
-    int verbose;
+    enum verbose_type {
+        VERBOSE_FATAL = 0, /* 0 is the default verbosity */
+        VERBOSE_ERROR,
+        VERBOSE_WARNING,
+        VERBOSE_INFO,
+        VERBOSE_DEBUG
+    } verbose;
 } conf;
 
 void print_usage();

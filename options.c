@@ -60,13 +60,13 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
                 opts->verbose = strtol(optarg, &number_end, 10);
                 if( number_end == optarg ) { /* strtol() failed */
                     optarg_len = strlen(optarg);
-                    opts->verbose = optarg_len;
+                    opts->verbose = 1 + optarg_len; /* default fatal == 0 */
                 }
             }
-            if( opts->verbose > MAX_VERBOSE )
-                opts->verbose = MAX_VERBOSE;
-            else if( opts->verbose < 0 ) /* possible if strtol() worked */
-                opts->verbose = 0;
+            if( opts->verbose > VERBOSE_DEBUG )
+                opts->verbose = VERBOSE_DEBUG;
+            else if( opts->verbose < VERBOSE_FATAL )
+                opts->verbose = VERBOSE_FATAL;
             break;
         case '?':
             success_flag = 0;
