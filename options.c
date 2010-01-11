@@ -25,7 +25,6 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     const char * filename;
     int filename_len = 0;
     char* number_end; /* for strtol() */
-    const int MAX_VERBOSE = 42; /* FIXME: what is a reasonable max? */
 
     while( 1 ) {
         static struct option long_options[] = {
@@ -57,9 +56,7 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             }
             break;
         case 'v':
-            if( optarg == NULL )
-                opts->verbose = 0;
-            else {
+            if( optarg != NULL ) {
                 opts->verbose = strtol(optarg, &number_end, 10);
                 if( number_end == optarg ) { /* strtol() failed */
                     optarg_len = strlen(optarg);
