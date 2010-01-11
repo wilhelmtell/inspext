@@ -14,4 +14,6 @@ typedef struct token {
     int heading_level;
 } token;
 
+char* token_s(enum token_type t);
+
 #endif // TOKEN_H_
