@@ -3,6 +3,8 @@
 #include "options.h"
 #include "parse.h"
 
+conf opts = { NULL, NULL, VERBOSE_FATAL };
+
 static int sanity(conf* opts)
 {
     if( opts->input_files == NULL ) {
@@ -23,7 +25,6 @@ static int sanity(conf* opts)
 
 int main(int argc, char* argv[])
 {
-    conf opts = { NULL, NULL, 0 };
     lex_state lstate = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL, NULL };
     node* rep;
     input_file *file, *tmp_file;
