@@ -7,9 +7,9 @@ INSPext stands for "INSPext is a Not-So-Plain tEXT grammar".  The g for
 'grammar' is silent and somewhat hard to see with the naked eye.  The INSPext
 project is yet another attempt at defining a grammar for an abstract text; text
 that can easily be exported and imported to and from many other text formats.
-  
+
   GETTING UNNECESSARILY WORDY
-  
+
 Text written in INSPext can be easily exported and imported to and from
 plaintext, LaTeX, Microsoft Word, Apple iWork Pages and other popular formats
 and tools.  The idea is that for some rare kinds of people (read: me) it is
@@ -45,7 +45,7 @@ simple.  Pictures are complex beasts, brochurs are complex beasts, women are
 complex beasts -- but text is a simple beast.  So our text boils down to
 letters, words, sentences, paragraphs, sections (or chapters).  Let's also
 allow for a title, but that's it for now.
- 
+
 Perhaps it would be overly religious to disallow tables, but others may say it
 is also fundamental to allow for mathematical expressions, tables of contents,
 bibliography and other common elements.  So lets go back to our goal:
