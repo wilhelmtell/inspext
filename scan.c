@@ -10,6 +10,13 @@ void putback(token* tok, lex_state* lstate)
     lstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
     lstate->token_buf->tok = tok;
     lstate->token_buf->next = tmp;
+    fprintf(stderr, "Put back %s", token_s(tok->type));
+    if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' )
+        fprintf(stderr, " NL\n");
+    else if( tok->type == CHARACTER_TOKEN )
+        fprintf(stderr, " '%c'\n", tok->ch);
+    else
+        fprintf(stderr, "\n");
 }
 
 static void putbackc(int ch, lex_state* state)
@@ -61,141 +68,107 @@ token* a_token_of(enum token_type type, char ch, int heading_level)
     return tok;
 }
 
+static int peekc(FILE* is, lex_state* state)
+{
+    int ch = 0;
+
+    ch = sipc(is, state);
+    putbackc(ch, state);
+    return ch;
+}
+
+static int is_leading_or_delimiting_newline(int ch, FILE* is, lex_state* state)
+{
+    enum token_type prev = state->previous_token;
+    int next_ch = peekc(is, state);
+
+    return ch == '\n' && (next_ch == '\n' || prev == UNDEFINED_TOKEN);
+}
+
+/* static int is_inside_paragraph(int ch, lex_state* state) */
+/* { */
+    /* enum token_type prev = state->previous_token; */
+    /* return prev == PARAGRAPH_TOKEN || prev == CHARACTER_TOKEN; */
+/* } */
+
+static int is_indenting(int ch, lex_state* state)
+{
+    enum token_type prev = state->previous_token;
+    return ch == ' ' && (prev == HEADING_TOKEN || prev == INDENT_TOKEN);
+}
+
+/* static int is_at_beginning_of_line(lex_state* state) */
+/* { */
+    /* int prev_ch = state->previous_token_ch; */
+    /* enum token_type prev_type = state->previous_token_type; */
+    /* return prev_type == UNDEFINED_TOKEN || (prev_type == CHARACTER_TOKEN && prev_ch == '\n'); */
+/* } */
+
+/* TODO: state should hold a copy of the previous token, not just its type */
 static token* force_scan(FILE* is, lex_state* state)
 {
     int ch = 0, i = 0;
 
     ch = sipc(is, state);
-    if( ch == EOF )
+    if( ch == EOF ) {
+        state->beginning_of_line = 0;
+        state->previous_token = END_TOKEN;
         return a_token_of(END_TOKEN, '\0', state->heading_level);
+    } else if( ch == ' ' && state->beginning_of_line ) {
+        /* A heading is an indented text of length 1 character or more, and
+         * that spans from the beginnnig of a line until 2 consecutive newlines
+         * or until EOF. */
 
-    /* A heading is an indented text of length 1 character or more, and that
-     * spans until 2 consecutive newlines or until EOF. */
-    if( ch == ' ' && state->beginning_of_line ) {
-        for( i = 1; ch == ' '; ++i )
+        /* TODO: allow for multiline heading */
+        for( i = 0; ch == ' '; ++i )
             ch = sipc(is, state);
-        if( ch == EOF || ch == '\n' ) { /* empty line */
-            putbackc(ch, state);
-            return force_scan(is, state); /* whitespace ignored */
+        putbackc(ch, state);
+        /* if ch is EOF or newline the line is semantically empty; ignore */
+        if( ch == EOF || ch == '\n' ) {
+            if( ch == '\n' ) ++state->lineno;
+            return force_scan(is, state);
         } else {
-            putbackc(ch, state);
             if( i > state->heading_level )
                 ++state->heading_level;
             else
                 state->heading_level = i;
             while( i-- > 0 )
                 putbackc(' ', state);
+            state->previous_token = HEADING_TOKEN;
+            state->beginning_of_line = 0;
             return a_token_of(HEADING_TOKEN, '\0', state->heading_level);
         }
-    }
-
-    /* A paragraph is a sequence of characters of length 1 character or more,
-     * and that spans until 2 consecutive newlines or until EOF. */
-
-    return NULL;
-}
-
-/* FIXME: should be static.  static omitted to relax compiler warning */
-token* force_scan_old(FILE* is, lex_state* state)
-{
-    int ch;
-    int i = 0, j = 0;
-    token* tok;
-
-    ch = sipc(is, state);
-    tok = (token*)malloc(sizeof(token));
-    if( ch == EOF ) {
-        tok->type = END_TOKEN;
-    } else if( ch == ' ' ) {
-        if( state->beginning_of_line ) {
-            /* verify it's a heading */
-            for( i = 0; ch == ' '; ++i ) { /* is there text after indent? */
-                ch = sipc(is, state);
-            }
-            putbackc(ch, state);
-            while( --i > 0 ) {
-                putbackc(' ', state);
-            }
-            if( ch == EOF || ch == '\n' ) { /* no heading */
-                tok->type = CHARACTER_TOKEN;
-                tok->ch = ' ';
-                state->previous_token = CHARACTER_TOKEN;
-                state->indenting = 0;
-                state->beginning_of_line = 0;
-            } else {
-                ch = ' '; /* was changed by heading validation */
-                tok->type = HEADING_TOKEN;
-                state->previous_token = HEADING_TOKEN;
-                state->indenting = 1;
-                state->beginning_of_line = 0;
-                for( i = 0; ch == ' '; ++i ) { /* calculate level */
-                    ch = sipc(is, state);
-                }
-                if( i > state->heading_level )
-                    i = ++state->heading_level;
-                else /* FIXME: trap inconsistent indents */
-                    state->heading_level = i;
-                tok->heading_level = i;
-                putbackc(ch, state);
-                while( i-- > 0 ) { /* restore input: putback indent */
-                    putbackc(' ', state);
-                }
-            }
-        } else if( state->indenting ) { /* not beginning_of_line */
-            tok->type = INDENT_TOKEN;
-            state->previous_token = INDENT_TOKEN;
-        } else { /* not beginning_of_line, not indenting */
-            tok->type = CHARACTER_TOKEN;
-            tok->ch = ch;
-        }
-    } else if( ch == '\n' ) {
+    } else if( is_indenting(ch, state) ) {
+        state->beginning_of_line = 0;
+        state->delimited = 0;
+        state->previous_token = INDENT_TOKEN;
+        return a_token_of(INDENT_TOKEN, '\0', state->heading_level);
+    } else if( is_leading_or_delimiting_newline(ch, is, state) ) {
         state->beginning_of_line = 1;
-        state->indenting = 0;
-        ch = sipc(is, state);
-        if( ch == '\n' ) { /* heading ahead? */
-            for( i = 0; ch == '\n'; ++i ) {
-                ch = sipc(is, state);
-                for( j = 0; ch == ' '; ++j )
-                    ch = sipc(is, state);
-                if( ch == '\n' && j > 0 ) { /* line of whitespace only */
-                    putbackc('\n', state);
-                } else if( ch != '\n' && j > 0 ) { /* heading ahead */
-                    putbackc(ch, state);
-                    while( j-- > 0 )
-                        putbackc(' ', state);
-                    ch = ' ';
-                    tok->type = HEADING_TOKEN;
-                    state->previous_token = HEADING_TOKEN;
-                    state->paragraph_separator = 0;
-                } else if( ch == '\n' && i > 0 ) { /* j == 0 */
-                    putbackc(ch, state);
-                    while( i-- > 0 )
-                        putbackc('\n', state);
-                    ch = '\n';
-                }
-            }
-        }
-        if( ch == '\n' && ! state->paragraph_separator ) {
-            putbackc('\n', state);
-            putbackc('\n', state);
-            tok->type = PARAGRAPH_TOKEN;
-            state->previous_token = PARAGRAPH_TOKEN;
-            state->paragraph_separator = 1;
-        } else { /* FIXME: treat lines with only whitespace as empty lines */
-            putbackc(ch, state);
+        state->delimited = 1;
+        /* leading/delimiting newlines; chop them out */
+        while( ch == '\n' ) {
             ++state->lineno;
-            tok->type = CHARACTER_TOKEN;
-            state->previous_token = CHARACTER_TOKEN;
-            tok->ch = '\n';
+            ch = sipc(is, state);
         }
-    } else {
-        state->paragraph_separator = 0;
-        tok->type = CHARACTER_TOKEN;
-        state->previous_token = CHARACTER_TOKEN;
-        state->beginning_of_line = state->indenting = 0;
-        tok->ch = ch;
+        putbackc(ch, state);
+        return force_scan(is, state);
+    } else { /* inside (or about to start) a running text */
+        /* A paragraph is a sequence of characters of length 1 character or
+         * more, and that spans from the beginning of a line until 2
+         * consecutive newlines or until EOF. */
+        state->beginning_of_line = 0;
+        if( state->delimited ) {
+            putbackc(ch, state);
+            state->delimited = 0;
+            state->previous_token = PARAGRAPH_TOKEN;
+            return a_token_of(PARAGRAPH_TOKEN, '\0', state->heading_level);
+        } else {
+            state->delimited = 0;
+            state->previous_token = CHARACTER_TOKEN;
+            return a_token_of(CHARACTER_TOKEN, ch, state->heading_level);
+        }
     }
-    return tok;
 }
 
 token* peek(FILE* is, lex_state* state)
@@ -226,6 +199,9 @@ token* scan(FILE* is, lex_state* lstate)
     fprintf(stderr, "Got %s", token_s(tok->type));
     if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' )
         fprintf(stderr, " NL\n");
-    else fprintf(stderr, " '%c'\n", tok->ch);
+    else if( tok->type == CHARACTER_TOKEN )
+        fprintf(stderr, " '%c'\n", tok->ch);
+    else
+        fprintf(stderr, "\n");
     return tok;
 }
