@@ -25,7 +25,7 @@ static int sanity(conf* opts)
 
 int main(int argc, char* argv[])
 {
-    lex_state lstate = { 1, 0, 0, 1, 0, "?", UNDEFINED_TOKEN, NULL, NULL };
+    lex_state lstate = { 1, 0, 0, 0, NULL, UNDEFINED_TOKEN, NULL, NULL };
     node* rep;
     input_file *file, *tmp_file;
 
