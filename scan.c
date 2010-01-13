@@ -10,13 +10,6 @@ void putback(token* tok, lex_state* lstate)
     lstate->token_buf = (token_buf_t*)malloc(sizeof(token_buf_t));
     lstate->token_buf->tok = tok;
     lstate->token_buf->next = tmp;
-    fprintf(stderr, "Put back %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' )
-        fprintf(stderr, " NL\n");
-    else if( tok->type == CHARACTER_TOKEN )
-        fprintf(stderr, " '%c'\n", tok->ch);
-    else
-        fprintf(stderr, "\n");
 }
 
 static void putbackc(int ch, lex_state* state)
@@ -196,12 +189,5 @@ token* scan(FILE* is, lex_state* lstate)
     } else {
         tok = force_scan(is, lstate);
     }
-    fprintf(stderr, "Got %s", token_s(tok->type));
-    if( tok->type == CHARACTER_TOKEN && tok->ch == '\n' )
-        fprintf(stderr, " NL\n");
-    else if( tok->type == CHARACTER_TOKEN )
-        fprintf(stderr, " '%c'\n", tok->ch);
-    else
-        fprintf(stderr, "\n");
     return tok;
 }
