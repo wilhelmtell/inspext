@@ -105,7 +105,7 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             file->stream = fopen(filename, "r");
             if( file->stream == NULL ) {
                 fprintf(stderr, "ERROR:Can't open file %s for reading\n", filename);
-                success_flag = 0; /* FIXME: error when can't open file? */
+                success_flag = 0;
             }
         }
         ++optind;
