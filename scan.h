@@ -16,8 +16,7 @@ typedef struct token_buf_t {
 
 typedef struct lex_state {
     int beginning_of_line;
-    int indenting;
-    int paragraph_separator;
+    int delimited; /* two newlines consumed; ready for paragraph or heading */
     int lineno;
     int heading_level;
     char* filename;
