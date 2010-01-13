@@ -27,8 +27,25 @@ void gen_plain(FILE* os, node* syntree)
 
     assert(syntree->type == TEXT_NODE);
     child = syntree->children;
+    /* generate first heading or paragraph; we don't output a preceding newline
+     * so text starts right away, at the beginning of the file. */
+    if( child->type == HEADING_NODE ) {
+        if( child->type == HEADING_NODE ) {
+            for( i = 0; i < child->heading_level; ++i ) {
+                fputc(' ', os);
+            }
+            gen_plain_heading(os, child->children);
+        }
+    } else if( child->type == PARAGRAPH_NODE ) {
+        gen_plain_paragraph(os, child->children);
+    }
+    child = child->siblings;
+    /* subsequent headings/paragraphs: each is preceded by a couple of
+     * delimiting newlines. */
     while( child != NULL ) {
         if( child->type == HEADING_NODE ) {
+            fputc('\n', os);
+            fputc('\n', os);
             for( i = 0; i < child->heading_level; ++i ) {
                 fputc(' ', os);
             }
