@@ -1,4 +1,4 @@
-text          := heading* paragraph* (text | NIL)
-heading       := same_indent INDENT indented_text
-indented_text := [^\n]+ (NL same_indent indented_text | NIL)
-paragraph     := NL NL+ CH+
+text            := heading* paragraph* (text | NIL)
+heading         := (BOF | BOF NL | NL NL+) same_h_indent INDENT indented_text
+indented_header := [^\n]+ (NL same_h_indent indented_text | NIL)
+paragraph       := (BOF | BOF NL | NL NL+) CH+
