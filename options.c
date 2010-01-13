@@ -7,12 +7,12 @@
 
 void print_usage()
 {
-    /* TODO: add option output file (stdout by default?) */
-    /* TODO: add option verbosity */
     printf(" Usage: inspec [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
             "                    [plaintext, latex]\n"
             "-v, --verbose[=n]   Output some trace info\n"
+            "-o, --output <out>  Output to file <out>. Use - to specify\n"
+            "                    stdout (default)"
             );
 }
 
@@ -26,17 +26,19 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     int filename_len = 0;
     char* number_end; /* for strtol() */
 
+    opts->output_file = stdout; /* default */
     while( 1 ) {
         static struct option long_options[] = {
             { "help", no_argument, 0, 'h' },
             { "target", required_argument, 0, 't' },
             { "verbose", optional_argument, 0, 'v' },
+            { "output", required_argument, 0, 'o' },
             { 0, 0, 0, 0 }
         };
         int option_index = 0;
         int optarg_len = 0;
 
-        c = getopt_long(argc, argv, "ht:v::", long_options, &option_index);
+        c = getopt_long(argc, argv, "ht:v::o:", long_options, &option_index);
         if( c == -1 ) break;
         switch( c ) {
         case 'h':
@@ -67,6 +69,17 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
                 opts->verbose = VERBOSE_DEBUG;
             else if( opts->verbose < VERBOSE_FATAL )
                 opts->verbose = VERBOSE_FATAL;
+            break;
+        case 'o':
+            filename = optarg;
+            optarg_len = strlen(optarg);
+            if( strncmp(filename, "-", optarg_len) != 0 )
+                if( (opts->output_file = fopen(filename, "w")) == NULL ) {
+                    fprintf(stderr,
+                            "ERROR:Can't open file %s for writing.\n",
+                            filename);
+                    success_flag = 0;
+                }
             break;
         case '?':
             success_flag = 0;

@@ -13,6 +13,7 @@ typedef struct input_file {
 typedef struct conf {
     void (*gen)(FILE*,node*);
     struct input_file* input_files;
+    FILE* output_file;
     enum verbose_type {
         VERBOSE_FATAL = 0, /* 0 is the default verbosity */
         VERBOSE_ERROR,

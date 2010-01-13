@@ -3,7 +3,7 @@
 #include "options.h"
 #include "parse.h"
 
-conf opts = { NULL, NULL, VERBOSE_FATAL };
+conf opts = { NULL, NULL, NULL, VERBOSE_FATAL };
 
 static int sanity(conf* opts)
 {
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
         lstate.filename = file->filename;
         while( ! feof(file->stream) ) {
             rep = parse_text(file->stream, &lstate);
-            opts.gen(stdout, rep);
+            opts.gen(opts.output_file, rep);
             free_node(rep);
         }
         if( file->stream != stdin ) fclose(file->stream);
