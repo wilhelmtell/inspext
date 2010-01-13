@@ -100,16 +100,9 @@ static node* parse_paragraph(FILE* is, lex_state* lstate)
     node *the_node, *child_node, *pos;
     token* tok, *tmpt;
 
-    tok = scan(is, lstate);
-    assert(tok->type == CHARACTER_TOKEN);
-    assert(tok->ch == '\n');
-    free(tok);
-    tok = scan(is, lstate);
-    assert(tok->type == CHARACTER_TOKEN);
-    assert(tok->ch == '\n');
-    free(tok);
     while( 1 ) {
         tok = scan(is, lstate);
+        assert(tok->type == CHARACTER_TOKEN);
         if( tok->type != CHARACTER_TOKEN || tok->ch != '\n' ) {
             putback(tok, lstate);
             break;
