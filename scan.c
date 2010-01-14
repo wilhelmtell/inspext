@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* TODO: Function docs */
 void putback(token* tok, lex_state* lstate)
 {
     token_buf_t* tmp;
@@ -12,9 +13,13 @@ void putback(token* tok, lex_state* lstate)
     lstate->token_buf->next = tmp;
 }
 
+/* Put a character into the input stream buffer.
+ *
+ * The next character sipped will then be this character.
+ *
+ * The state parameter must point to a valid state object */
 static void putbackc(int ch, lex_state* state)
 {
-    /* FIXME: check for NULL */
     stream_buf_t* tmp = state->stream_buf;
 
     state->stream_buf = (stream_buf_t*)malloc(sizeof(stream_buf_t));
@@ -22,14 +27,17 @@ static void putbackc(int ch, lex_state* state)
     state->stream_buf->next = tmp;
 }
 
-/* sip (get) a character from the state's buffer, or if the buffer is empty --
- * from the given input stream. */
+/* Get the next input character.
+ *
+ * If there's a character in the stream buffer then return that character.
+ * Otherwise take a character from the given input stream and return that.
+ *
+ * The state parameter must point to a valid state object. */
 static int sipc(FILE* is, lex_state* state)
 {
     stream_buf_t* tmp;
     int ch;
 
-    /* FIXME: check for NULL */
     if( state->stream_buf != NULL ) {
         tmp = state->stream_buf;
         ch = state->stream_buf->ch;

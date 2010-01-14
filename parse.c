@@ -94,7 +94,6 @@ static node* parse_heading(FILE* is, lex_state* lstate)
     return the_node;
 }
 
-/* TODO: implement */
 static node* parse_paragraph(FILE* is, lex_state* lstate)
 {
     node *the_node, *child_node, *pos;
