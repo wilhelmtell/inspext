@@ -46,7 +46,9 @@ static node* parse_indented_text(FILE* is, lex_state* lstate)
     pos = the_node;
     while( 1 ) {
         tok = scan(is, lstate);
-        if( tok->type == PARAGRAPH_TOKEN ) { /* FIXME: END_TOKEN? */
+        if( tok->type == PARAGRAPH_TOKEN ||
+                tok->type == HEADING_TOKEN ||
+                tok->type == END_TOKEN) {
             putback(tok, lstate);
             break;
         } else if( tok->type != CHARACTER_TOKEN ) {
