@@ -1,3 +1,5 @@
+# Specify the project's name
+PROJECT_NAME = "INSPext"
 # Specify the main target
 TARGET = inspc
 # Default build type
@@ -33,10 +35,12 @@ INCPATH = . $(HOME)/Development/include
 LIBPATH =
 
 # Which files to add to backups, apart from the source code
-EXTRA_FILES = Makefile
+EXTRA_FILES = Makefile README grammar
 # The compiler
 CC = gcc
 
+# filename-friendly project name
+PROJECT_FILENAME = $(shell echo $(PROJECT_NAME) | tr -d -C 'a-zA-Z0-9 _-' |tr 'A-Z ' 'a-z_')
 # Where to store object and dependancy files.
 STORE = .make-$(TYPE)
 # Makes a list of the source (.c) files.
@@ -88,7 +92,11 @@ distclean: clean
 # Backup the source files.
 backup:
 	@-if [ ! -e .backup ]; then mkdir .backup; fi;
-	@zip .backup/backup_`date +%d-%m-%y_%H.%M`.zip $(SOURCE) $(HEADERS) $(EXTRA_FILES)
+	@if [ -e $(PROJECT_FILENAME) ]; then echo "Directory $(PROJECT_FILENAME) already exists." >&2; false; fi;
+	@mkdir $(PROJECT_FILENAME)
+	@cp -a $(SOURCE) $(HEADERS) $(EXTRA_FILES) $(PROJECT_FILENAME)
+	@tar c $(PROJECT_FILENAME) |gzip -9 >.backup/backup_`date +%Y%m%d%H%M`.tar.gz
+	@rm -rf $(PROJECT_FILENAME)
 
 # Create necessary directories
 dirs:
