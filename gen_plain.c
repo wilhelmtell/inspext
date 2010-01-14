@@ -4,6 +4,9 @@
 
 static void gen_plain_heading(FILE* os, node* syntree)
 {
+    /* TODO: separate heading from previous paragraph by 3 newlines. */
+    /* How many newlines should we put for seperating one heading from
+     * another? */
     while( syntree != NULL ) {
         assert(syntree->type == CHARACTER_NODE);
         fputc(toupper(syntree->ch), os);

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* TODO: Function docs */
 void putback(token* tok, lex_state* lstate)
 {
     token_buf_t* tmp;
@@ -13,11 +12,6 @@ void putback(token* tok, lex_state* lstate)
     lstate->token_buf->next = tmp;
 }
 
-/* Put a character into the input stream buffer.
- *
- * The next character sipped will then be this character.
- *
- * The state parameter must point to a valid state object */
 static void putbackc(int ch, lex_state* state)
 {
     stream_buf_t* tmp = state->stream_buf;
@@ -27,12 +21,6 @@ static void putbackc(int ch, lex_state* state)
     state->stream_buf->next = tmp;
 }
 
-/* Get the next input character.
- *
- * If there's a character in the stream buffer then return that character.
- * Otherwise take a character from the given input stream and return that.
- *
- * The state parameter must point to a valid state object. */
 static int sipc(FILE* is, lex_state* state)
 {
     stream_buf_t* tmp;
@@ -105,7 +93,11 @@ static int is_indenting(int ch, lex_state* state)
     /* return prev_type == UNDEFINED_TOKEN || (prev_type == CHARACTER_TOKEN && prev_ch == '\n'); */
 /* } */
 
-/* TODO: state should hold a copy of the previous token, not just its type */
+/* Scan a token from the given input stream.
+ *
+ * This will not access the token buffer.  scan() is probably the only function
+ * that should call force_scan().
+ */
 static token* force_scan(FILE* is, lex_state* state)
 {
     int ch = 0, i = 0;
@@ -176,19 +168,23 @@ token* peek(FILE* is, lex_state* state)
 {
     token* tok;
 
-    /* TODO: maintain token buf as opposed to char buf */
-    /*       this so i dont need to scan the same token twice */
     tok = force_scan(is, state);
     putbackc(tok->ch, state);
     return tok;
 }
 
+/* Scan a token from the input stream.
+ *
+ * If the token buffer holds a token then return that token. Otherwise scan a
+ * token from the given input stream.
+ *
+ * The state parameter must point to a valid state object.
+ */
 token* scan(FILE* is, lex_state* lstate)
 {
     token_buf_t* tmp;
     token* tok;
 
-    /* FIXME: report error when NULL */
     if( lstate->token_buf != NULL ) {
         tmp = lstate->token_buf;
         tok = lstate->token_buf->tok;
