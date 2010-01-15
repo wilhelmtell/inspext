@@ -8,7 +8,7 @@
 
 void print_usage()
 {
-    printf(" Usage: inspec [options]\n\n"
+    printf(" Usage: inspc [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
             "                    [plaintext, latex]\n"
             "-v, --verbose[=n]   Output some trace info\n"
