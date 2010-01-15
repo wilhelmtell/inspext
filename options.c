@@ -12,7 +12,7 @@ void print_usage()
             "                    [plaintext, latex]\n"
             "-v, --verbose[=n]   Output some trace info\n"
             "-o, --output <out>  Output to file <out>. Use - to specify\n"
-            "                    stdout (default)"
+            "                    stdout (default)\n"
             );
 }
 
