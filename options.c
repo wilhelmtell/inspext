@@ -6,6 +6,7 @@
 #include "gen_plain.h"
 #include "gen_latex.h"
 
+/* TODO: specify defaults in help message. create config.h ? */
 void print_usage()
 {
     printf(" Usage: inspc [options]\n\n"
@@ -59,11 +60,14 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             }
             break;
         case 'v':
-            if( optarg != NULL ) {
+            /* verbose level. --vN or -v[v[...]] */
+            if( optarg == NULL ) { /* no arg given, but still -v given */
+                opts->verbose = VERBOSE_DEFAULT + 1;
+            } else {
                 opts->verbose = strtol(optarg, &number_end, 10);
-                if( number_end == optarg ) { /* strtol() failed */
+                if( number_end == optarg ) { /* strtol failed: count -vvv... */
                     optarg_len = strlen(optarg);
-                    opts->verbose = 1 + optarg_len; /* default fatal == 0 */
+                    opts->verbose = 1 + optarg_len;
                 }
             }
             if( opts->verbose > VERBOSE_DEBUG )
