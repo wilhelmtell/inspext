@@ -15,7 +15,7 @@ typedef struct conf {
     struct input_file* input_files;
     FILE* output_file;
     enum verbose_type {
-        VERBOSE_DEFAULT = 1;
+        VERBOSE_DEFAULT = 1,
         VERBOSE_FATAL = 0,
         VERBOSE_ERROR = 1,
         VERBOSE_WARNING,
