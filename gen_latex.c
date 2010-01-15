@@ -42,6 +42,8 @@ void gen_latex(FILE* os, node* syntree)
     fputc('\n', os);
     fprintf(os, "\\begin{document}");
     child = syntree->children;
+    if( child->children == NULL )
+        fputc('\n', os);
     /* subsequent headings/paragraphs: each is preceded by a couple of
      * delimiting newlines. */
     while( child != NULL ) {
