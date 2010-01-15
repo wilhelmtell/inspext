@@ -56,5 +56,5 @@ void gen_latex(FILE* os, node* syntree)
         }
         child = child->siblings;
     }
-    fprintf(os, "\\end{document}\n");
+    fprintf(os, "\n\\end{document}\n");
 }
