@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "options.h"
 #include "gen_plain.h"
+#include "gen_latex.h"
 
 void print_usage()
 {
@@ -21,7 +22,7 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     int c, success_flag = 1;
     input_file* file, *pos;
     const char * const plaintext = "plaintext";
-    /* const char * const latex = "latex"; */
+    const char * const latex = "latex";
     const char * filename;
     int filename_len = 0;
     char* number_end; /* for strtol() */
@@ -49,8 +50,8 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             optarg_len = strlen(optarg);
             if( strstr(plaintext, optarg) == plaintext ) {
                 opts->gen = &gen_plain;
-            /* } else if( strstr(latex, optarg) == latex ) { */
-                /* opts->gen = &gen_latex; */
+            } else if( strstr(latex, optarg) == latex ) {
+                opts->gen = &gen_latex;
             } else {
                 fprintf(stderr, "ERROR:Unrecognized target %s\n", optarg);
                 success_flag = 0;
