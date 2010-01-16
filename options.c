@@ -5,13 +5,14 @@
 #include "options.h"
 #include "gen_plain.h"
 #include "gen_latex.h"
+#include "gen_html.h"
 
 /* TODO: specify defaults in help message. create config.h ? */
 void print_usage()
 {
     printf(" Usage: inspc [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
-            "                    [plaintext, latex]\n"
+            "                    [plaintext, latex, html]\n"
             "-v, --verbose[=n]   Output some trace info\n"
             "-o, --output <out>  Output to file <out>. Use - to specify\n"
             "                    stdout (default)\n"
@@ -24,6 +25,7 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     input_file* file, *pos;
     const char * const plaintext = "plaintext";
     const char * const latex = "latex";
+    const char * const html = "html";
     const char * filename;
     int filename_len = 0;
     char* number_end; /* for strtol() */
@@ -53,6 +55,8 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
                 opts->gen = &gen_plain;
             } else if( strstr(latex, optarg) == latex ) {
                 opts->gen = &gen_latex;
+            } else if( strstr(html, optarg) == html ) {
+                opts->gen = &gen_html;
             } else {
                 fprintf(stderr, "ERROR:Unrecognized target %s\n", optarg);
                 success_flag = 0;
