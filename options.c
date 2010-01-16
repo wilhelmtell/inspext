@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <string.h>
+#include "string.h"
 #include <getopt.h>
 #include <stdio.h>
 #include "options.h"
@@ -51,11 +51,11 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             break;
         case 't':
             optarg_len = strlen(optarg);
-            if( strstr(plaintext, optarg) == plaintext ) {
+            if( stristr(plaintext, optarg) == plaintext ) {
                 opts->gen = &gen_plain;
-            } else if( strstr(latex, optarg) == latex ) {
+            } else if( stristr(latex, optarg) == latex ) {
                 opts->gen = &gen_latex;
-            } else if( strstr(html, optarg) == html ) {
+            } else if( stristr(html, optarg) == html ) {
                 opts->gen = &gen_html;
             } else {
                 fprintf(stderr, "ERROR:Unrecognized target %s\n", optarg);

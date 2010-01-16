@@ -31,7 +31,7 @@ MACROS = NDEBUG
 endif
 
 # Add directories to the include and library paths
-INCPATH = . $(HOME)/Development/include
+INCPATH = $(HOME)/Development/include
 LIBPATH =
 
 # Which files to add to backups, apart from the source code
