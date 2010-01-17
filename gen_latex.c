@@ -57,7 +57,7 @@ void gen_latex(FILE* os, node* syntree)
     node *child;
 
     assert(syntree->type == TEXT_NODE);
-    fprintf(os, "\\documentclass{article}[letterpaper,11pt]\n");
+    fprintf(os, "\\documentclass[letterpaper,11pt]{article}\n");
     fputc('\n', os);
     fprintf(os, "\\begin{document}");
     child = syntree->children;
