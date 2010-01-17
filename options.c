@@ -22,9 +22,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include "options.h"
-#include "gen_plain.h"
-#include "gen_latex.h"
-#include "gen_html.h"
+#include "generators.h"
 
 /* TODO: specify defaults in help message. create config.h ? */
 void print_usage()

@@ -17,12 +17,14 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef GEN_HTML_H_
-#define GEN_HTML_H_
+#ifndef GENERATORS_H_
+#define GENERATORS_H_
 
 #include "parse.h"
 #include <stdio.h>
 
 void gen_html(FILE* os, node* syntree);
+void gen_latex(FILE* os, node* syntree);
+void gen_plain(FILE* os, node* syntree);
 
-#endif // GEN_HTML_H_
+#endif // GENERATORS_H_
