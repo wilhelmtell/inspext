@@ -33,6 +33,19 @@ typedef struct token_buf_t {
     struct token_buf_t* next;
 } token_buf_t;
 
+typedef struct token {
+    enum token_type {
+        HEADING_TOKEN,
+        CHARACTER_TOKEN,
+        PARAGRAPH_TOKEN,
+        INDENT_TOKEN,
+        END_TOKEN,
+        UNDEFINED_TOKEN
+    } type;
+    char ch;
+    int heading_level;
+} token;
+
 typedef struct lex_state {
     int beginning_of_line;
     int delimited; /* two newlines consumed; ready for paragraph or heading */
@@ -44,6 +57,7 @@ typedef struct lex_state {
     token_buf_t* token_buf;
 } lex_state;
 
+char* token_s(enum token_type t);
 token* peek(FILE* is, lex_state* state);
 void putback(token* tok, lex_state* lstate);
 token* scan(FILE* is, lex_state* lstate);
