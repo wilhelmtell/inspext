@@ -113,7 +113,7 @@ backup:
 	@-if [ ! -e .backup ]; then mkdir .backup; fi;
 	@if [ -e $(PROJECT_FILENAME) ]; then echo "Directory $(PROJECT_FILENAME) already exists." >&2; false; fi;
 	@mkdir $(PROJECT_FILENAME)
-	@cp -a $(SOURCE) $(HEADERS) $(EXTRA_FILES) $(PROJECT_FILENAME)
+	@cp --archive --parents $(SOURCE) $(HEADERS) $(EXTRA_FILES) $(PROJECT_FILENAME)
 	@tar c $(PROJECT_FILENAME) |gzip -9 >.backup/backup_`date +%Y%m%d%H%M`.tar.gz
 	@rm -rf $(PROJECT_FILENAME)
 
