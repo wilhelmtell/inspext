@@ -46,4 +46,4 @@ typedef struct conf {
 void print_usage();
 int parse_cl_opts(int argc, char* argv[], conf* opts);
 
-#endif // OPTIONS_H_
+#endif /* OPTIONS_H_ */

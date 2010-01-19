@@ -41,4 +41,4 @@ typedef struct node {
 node* parse_text(FILE* is, lex_state* state);
 void free_node(node* n);
 
-#endif // PARSE_H_
+#endif /* PARSE_H_ */

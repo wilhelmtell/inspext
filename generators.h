@@ -27,4 +27,4 @@ void gen_html(FILE* os, node* syntree);
 void gen_latex(FILE* os, node* syntree);
 void gen_plain(FILE* os, node* syntree);
 
-#endif // GENERATORS_H_
+#endif /* GENERATORS_H_ */

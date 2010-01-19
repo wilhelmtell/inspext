@@ -61,4 +61,4 @@ token* peek(FILE* is, lex_state* state);
 void putback(token* tok, lex_state* lstate);
 token* scan(FILE* is, lex_state* lstate);
 
-#endif // SCAN_H_
+#endif /* SCAN_H_ */
