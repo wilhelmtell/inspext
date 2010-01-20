@@ -35,7 +35,6 @@ static int sanity(conf* opts)
     if( opts->gen == NULL ) {
         fprintf(stderr,
                 "ERROR:Please specify a valid target to compile to.\n"
-                "      Available targets: [plaintext, latex]\n"
                );
         return 0;
     }
