@@ -185,6 +185,7 @@ node* parse_text(FILE* is, lex_state* lstate)
     the_node->children = (node*)malloc(sizeof(node));
     pos = the_node->children;
     do {
+        free(tok);
         tok = scan(is, lstate);
         if( tok->type == HEADING_TOKEN ) {
             child_node = parse_heading(is, lstate);
@@ -207,7 +208,6 @@ node* parse_text(FILE* is, lex_state* lstate)
         pos->siblings = child_node;
         while( pos->siblings != NULL )
             pos = pos->siblings;
-        free(tok);
     } while( tok->type != END_TOKEN );
     pos = the_node->children;
     the_node->children = pos->siblings;
