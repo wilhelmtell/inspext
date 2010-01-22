@@ -99,9 +99,11 @@ static int peekc(FILE* is, lex_state* state)
 static int is_leading_or_delimiting_newline(int ch, FILE* is, lex_state* state)
 {
     enum token_type prev = state->previous_token;
+    int leading_or_trailing;
     int next_ch = peekc(is, state);
 
-    return ch == '\n' && (next_ch == '\n' || prev == UNDEFINED_TOKEN);
+    leading_or_trailing = (prev == UNDEFINED_TOKEN || next_ch == EOF);
+    return ch == '\n' && (next_ch == '\n' || leading_or_trailing);
 }
 
 /* static int is_inside_paragraph(int ch, lex_state* state) */
