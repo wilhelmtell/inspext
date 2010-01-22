@@ -180,6 +180,7 @@ node* parse_text(FILE* is, lex_state* lstate)
     node *the_node, *child_node, *pos;
 
     the_node = (node*)malloc(sizeof(node));
+    the_node->ch = '\0';
     the_node->type = TEXT_NODE;
     the_node->siblings = NULL;
     the_node->children = (node*)malloc(sizeof(node));
