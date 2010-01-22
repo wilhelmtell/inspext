@@ -178,6 +178,9 @@ static token* force_scan(FILE* is, lex_state* state)
         }
         putbackc(ch, state);
         return force_scan(is, state);
+    } else if( ch == '\n' && peekc(is, state) == ' ' ) {
+        state->beginning_of_line = 1;
+        return force_scan(is, state);
     } else { /* inside (or about to start) a running text */
         /* A paragraph is a sequence of characters of length 1 character or
          * more, and that spans from the beginning of a line until 2
