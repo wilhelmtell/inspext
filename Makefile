@@ -86,7 +86,7 @@ $(TARGET): $(OBJECTS)
 # the object path at the start of the file because the files gcc
 # outputs assume it will be in the same dir as the source file.
 $(STORE)/%.o: %.c
-	@-if [ \! -d $(dir $@) ]; then mkdir -p $(dir $@); fi;
+	@-[ -d $(dir $@) ] || mkdir -p $(dir $@);
 	@echo " CC	$?"
 	@$(CC) -Wp,-MMD,$(STORE)/$*.dd $(CCPARAM) $(foreach INC,$(INCPATH),-I$(INC)) \
 		$(foreach MACRO,$(MACROS),-D$(MACRO)) -c $< -o $@
