@@ -72,12 +72,12 @@ OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
 DFILES := $(addprefix $(STORE)/,$(SOURCE:.c=.d))
 
 # Specify phony rules. These are rules that are not real files.
-.PHONY: all clean distclean backup dirs
+.PHONY: all clean distclean backup
 
 # Main target. The @ in front of a command prevents make from displaying
 # it to the standard output.
 all: $(TARGET)
-$(TARGET): dirs $(OBJECTS)
+$(TARGET): $(OBJECTS)
 	@echo " LD	$(TARGET)"
 	@$(CC) -o $(TARGET) $(OBJECTS) $(LDPARAM) $(foreach LIBRARY, \
 		$(LIBS),-l$(LIBRARY)) $(foreach LIB,$(LIBPATH),-L$(LIB))
@@ -86,6 +86,7 @@ $(TARGET): dirs $(OBJECTS)
 # the object path at the start of the file because the files gcc
 # outputs assume it will be in the same dir as the source file.
 $(STORE)/%.o: %.c
+	@-if [ \! -d $(dir $@) ]; then mkdir -p $(dir $@); fi;
 	@echo " CC	$?"
 	@$(CC) -Wp,-MMD,$(STORE)/$*.dd $(CCPARAM) $(foreach INC,$(INCPATH),-I$(INC)) \
 		$(foreach MACRO,$(MACROS),-D$(MACRO)) -c $< -o $@
@@ -117,10 +118,6 @@ backup:
 	@tar c $(PROJECT_FILENAME) |gzip -9 >.backup/backup_`date +%Y%m%d%H%M`.tar.gz
 	@rm -rf $(PROJECT_FILENAME)
 
-# Create necessary directories
-dirs:
-	@-mkdir -p $(STORE)
-	@-$(foreach DIR,$(DIRS), mkdir -p $(STORE)/$(DIR) )
 
 # Includes the .d files so it knows the exact dependencies for every
 # source.
