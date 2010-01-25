@@ -173,7 +173,7 @@ static token* force_scan(FILE* is, lex_state* state)
          * more, and that spans from the beginning of a line until 2
          * consecutive newlines or until EOF. */
         state->beginning_of_line = 0;
-        if( state->delimited ) {
+        if( state->delimited || state->previous_token == UNDEFINED_TOKEN ) {
             putbackc(ch, state);
             state->delimited = 0;
             state->previous_token = PARAGRAPH_TOKEN;
