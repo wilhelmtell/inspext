@@ -22,7 +22,12 @@
 #include "options.h"
 #include "parse.h"
 
-conf opts = { NULL, NULL, NULL, VERBOSE_FATAL };
+conf opts = {
+    /* gen         */ NULL,
+    /* input_files */ NULL,
+    /* output_file */ NULL,
+    /* verbose     */ VERBOSE_ERROR
+};
 
 static int sanity(conf* opts)
 {
@@ -43,7 +48,16 @@ static int sanity(conf* opts)
 
 int main(int argc, char* argv[])
 {
-    lex_state lstate = { 1, 0, 0, 0, NULL, UNDEFINED_TOKEN, NULL, NULL };
+    lex_state lstate = {
+        /* beginning_of_line */ 1,
+        /* delimited         */ 0,
+        /* line_number       */ 0,
+        /* heading_level     */ 0,
+        /* filename          */ NULL,
+        /* previous_token    */ UNDEFINED_TOKEN,
+        /* stream_buf        */ NULL,
+        /* token_buf         */ NULL
+    };
     node* rep;
     input_file *file, *tmp_file;
 
