@@ -65,8 +65,6 @@ int main(int argc, char* argv[])
     if( !parse_cl_opts(argc, argv, &opts) || !sanity(&opts) )
         return EXIT_FAILURE;
     file = opts.input_files;
-    if( file == NULL )
-        return EXIT_FAILURE;
     while( file != NULL ) {
         lstate.filename = file->filename;
         while( ! feof(file->stream) ) {
