@@ -54,7 +54,6 @@ static node* parse_indent(FILE* is, lex_state* lstate)
     return the_node;
 }
 
-/* FIXME: return the entire heading as a single string */
 static node* parse_indented_text(FILE* is, lex_state* lstate)
 {
     node *the_node, *child_node, *pos;
@@ -129,7 +128,6 @@ static node* parse_paragraph(FILE* is, lex_state* lstate)
         }
         free(tok);
     }
-    /* FIXME: paragraph node as one string */
     the_node = (node*)malloc(sizeof(node));
     the_node->type = PARAGRAPH_NODE;
     the_node->ch = 0;
@@ -197,15 +195,12 @@ node* parse_text(FILE* is, lex_state* lstate)
             child_node->type = END_NODE;
             child_node->ch = 0;
             child_node->children = child_node->siblings = NULL;
-        } else { /* FIXME: allow non-paragraph text without heading */
+        } else { /* we shouldn't be here: bug in scanner? */
             fprintf(stderr, "%s:%d:Unexpected token %s\n",
                     lstate->filename, lstate->lineno, token_s(tok->type));
             free(tok);
-            return the_node; /* FIXME: abort on unexpected token?! */
+            return the_node;
         }
-        /* FIXME: if children is a long list then here we overwrite everything
-         * after the head of the list. the following loop will do but is slow.
-         * maybe add tail to node and maintain that? */
         pos->siblings = child_node;
         while( pos->siblings != NULL )
             pos = pos->siblings;
