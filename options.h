@@ -43,7 +43,15 @@ typedef struct conf {
     } verbose;
 } conf;
 
+typedef enum {
+    OPTS_ERR_UNRECOGNIZED_TARGET = 1,
+    OPTS_ERR_OPEN_WRITE,
+    OPTS_ERR_UNKNOWN_OPTION,
+    OPTS_ERR_OPEN_READ
+} options_error;
+
+char* options_error_s(options_error err);
 void print_usage();
-int parse_cl_opts(int argc, char* argv[], conf* opts);
+options_error parse_cl_opts(int argc, char* argv[], conf* opts);
 
 #endif /* OPTIONS_H_ */

@@ -29,21 +29,41 @@ conf opts = {
     /* verbose     */ VERBOSE_ERROR
 };
 
-static int sanity(conf* opts)
+typedef enum {
+    SANITY_ERROR_NO_INPUT_FILE = 1,
+    SANITY_ERROR_INVALID_TARGET
+} sanity_error;
+
+static sanity_error sanity_err = 0;
+
+static char* sanity_error_s(sanity_error err)
 {
-    if( opts->input_files == NULL ) {
-        fprintf(stderr,
-                "ERROR:Please specify input files. Use '-' for stdin.\n"
-               );
-        return 0;
-    }
-    if( opts->gen == NULL ) {
-        fprintf(stderr,
-                "ERROR:Please specify a valid target to compile to.\n"
-               );
-        return 0;
-    }
-    return 1;
+    if( err == SANITY_ERROR_NO_INPUT_FILE )
+        return "please specify input files, or '-' for stdin";
+    else if( err == SANITY_ERROR_INVALID_TARGET )
+        return "please specify a valid target to compile to";
+    return 0;
+}
+
+static int insanity(conf* opts)
+{
+    /* FIXME: extract error messages and have main() display them?
+     *        {
+     *            ...
+     *            return ERR_NO_INPUT_FILE;
+     *        }
+     *        ...
+     *        err = sanity(...);
+     *        if( err ) {
+     *            fprintf(stderr, "%s\n", err_s(err));
+     *            return EXIT_FAILURE;
+     *        }
+     */
+    if( opts->input_files == NULL )
+        return sanity_err = SANITY_ERROR_NO_INPUT_FILE;
+    if( opts->gen == NULL )
+        return sanity_err = SANITY_ERROR_INVALID_TARGET;
+    return 0;
 }
 
 int main(int argc, char* argv[])
@@ -60,10 +80,17 @@ int main(int argc, char* argv[])
     };
     node* rep;
     input_file *file, *tmp_file;
+    sanity_error sanerr = 0;
+    options_error opterr = 0;
 
 
-    if( !parse_cl_opts(argc, argv, &opts) || !sanity(&opts) )
+    if( (opterr = parse_cl_opts(argc, argv, &opts)) ) {
+        fprintf(stderr, "ERROR:%s\n", options_error_s(opterr));
         return EXIT_FAILURE;
+    } else if( (sanerr = insanity(&opts)) ) {
+        fprintf(stderr, "ERROR:%s\n", sanity_error_s(sanerr));
+        return EXIT_FAILURE;
+    }
     file = opts.input_files;
     while( file != NULL ) {
         lstate.filename = file->filename;

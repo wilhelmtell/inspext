@@ -20,9 +20,21 @@
 #include <stdlib.h>
 #include "string.h"
 #include <getopt.h>
-#include <stdio.h>
 #include "options.h"
 #include "generators.h"
+
+char* options_error_s(options_error err)
+{
+    if( err == OPTS_ERR_UNRECOGNIZED_TARGET )
+        return "unrecognized target"; /* FIXME: what target? */
+    else if( err == OPTS_ERR_OPEN_WRITE )
+        return "can't open file for writing"; /* FIXME: what file? */
+    else if( err == OPTS_ERR_UNKNOWN_OPTION )
+        return "invalid option"; /* FIXME: what option? */
+    else if( err == OPTS_ERR_OPEN_READ )
+        return "can't open file for reading"; /* FIXME: what file? */
+    else return "unknown commandline option error";
+}
 
 /* TODO: specify defaults in help message. create config.h ? */
 void print_usage()
@@ -36,9 +48,11 @@ void print_usage()
             );
 }
 
-int parse_cl_opts(int argc, char* argv[], conf* opts)
+options_error parse_cl_opts(int argc, char* argv[], conf* opts)
 {
-    int c, success_flag = 1;
+    int c;
+    extern int opterr;
+    options_error err = 0;
     input_file* file, *pos;
     const char * const plaintext = "plaintext";
     const char * const latex = "latex";
@@ -47,6 +61,7 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     int filename_len = 0;
     char* number_end; /* for strtol() */
 
+    opterr = 0;
     opts->output_file = stdout; /* default */
     while( 1 ) {
         static struct option long_options[] = {
@@ -75,8 +90,7 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             } else if( stristr(html, optarg) == html ) {
                 opts->gen = &gen_html;
             } else {
-                fprintf(stderr, "ERROR:Unrecognized target %s\n", optarg);
-                success_flag = 0;
+                err = OPTS_ERR_UNRECOGNIZED_TARGET;
                 opts->gen = NULL;
             }
             break;
@@ -100,15 +114,11 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             filename = optarg;
             optarg_len = strlen(optarg);
             if( strncmp(filename, "-", optarg_len) != 0 )
-                if( (opts->output_file = fopen(filename, "w")) == NULL ) {
-                    fprintf(stderr,
-                            "ERROR:Can't open file %s for writing.\n",
-                            filename);
-                    success_flag = 0;
-                }
+                if( (opts->output_file = fopen(filename, "w")) == NULL )
+                    err = OPTS_ERR_OPEN_WRITE;
             break;
         case '?':
-            success_flag = 0;
+            err = OPTS_ERR_UNKNOWN_OPTION;
             break;
         default:
             abort();
@@ -129,10 +139,8 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             file->stream = stdin;
         } else {
             file->stream = fopen(filename, "r");
-            if( file->stream == NULL ) {
-                fprintf(stderr, "ERROR:Can't open file %s for reading\n", filename);
-                success_flag = 0;
-            }
+            if( file->stream == NULL )
+                err = OPTS_ERR_OPEN_READ;
         }
         ++optind;
         if( file->stream != NULL ) {
@@ -143,5 +151,5 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     pos = opts->input_files;
     opts->input_files = opts->input_files->next;
     free(pos);
-    return success_flag;
+    return err;
 }
