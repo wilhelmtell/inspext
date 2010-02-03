@@ -205,6 +205,7 @@ node* parse_text(FILE* is, lex_state* lstate)
         while( pos->siblings != NULL )
             pos = pos->siblings;
     } while( tok->type != END_TOKEN );
+    free(tok);
     pos = the_node->children;
     the_node->children = pos->siblings;
     free(pos);
