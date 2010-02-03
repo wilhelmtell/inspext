@@ -24,18 +24,9 @@
 
 void free_node(node* n)
 {
-    node *p, *tmpc, *q, *tmps;
-
-    if( n == NULL )
-        return;
-    for( tmpc = p = n->children; p != NULL; p = tmpc ) {
-        for( tmps = q = p->siblings; q != NULL; q = tmps ) {
-            tmps = q->siblings;
-            free(q);
-        }
-        tmpc = p->children;
-        free(p);
-    }
+    if( n == NULL ) return;
+    free_node(n->children);
+    free_node(n->siblings);
     free(n);
 }
 
