@@ -134,6 +134,7 @@ options_error parse_cl_opts(int argc, char* argv[], conf* opts)
         filename_len = strlen(filename);
         file = (input_file*)malloc(sizeof(input_file));
         file->filename = (char*)malloc(filename_len+1);
+        file->next = NULL;
         strncpy(file->filename, filename, filename_len);
         if( strncmp(filename, "-", filename_len) == 0 ) {
             file->stream = stdin;
