@@ -201,4 +201,5 @@ void gen_plain(FILE* os, node* syntree)
         }
         child = child->siblings;
     }
+    fputc('\n', os);
 }
