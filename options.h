@@ -51,7 +51,7 @@ typedef enum {
 } options_error;
 
 char* options_error_s(options_error err);
-void print_usage();
+void print_usage(void);
 options_error parse_cl_opts(int argc, char* argv[], conf* opts);
 
 #endif /* OPTIONS_H_ */

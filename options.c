@@ -37,7 +37,7 @@ char* options_error_s(options_error err)
 }
 
 /* TODO: specify defaults in help message. create config.h ? */
-void print_usage()
+void print_usage(void)
 {
     printf(" Usage: inspc [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
