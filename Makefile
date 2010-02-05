@@ -120,7 +120,7 @@ backup:
 # Create necessary directories
 dirs:
 	@-mkdir -p $(STORE)
-	@-$(foreach DIR,$(DIRS), mkdir -p $(STORE)/$(DIR) )
+	@-mkdir -p $(foreach DIR, $(DIRS), $(STORE)/$(DIR))
 
 # Includes the .d files so it knows the exact dependencies for every
 # source.
