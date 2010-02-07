@@ -30,25 +30,6 @@ LIBS =
 # Dynamic libraries
 DLIBS =
 
-# The next blocks change some variables depending on the build type
-ifeq ($(TYPE),debug)
-LDPARAM =
-CCPARAM = -Wall -pedantic -ansi -g3
-MACROS =
-endif
-
-ifeq ($(TYPE),profile)
-LDPARAM = -pg /lib/libc.so.5
-CCPARAM = -Wall -pedantic -ansi -pg
-MACROS = NDEBUG
-endif
-
-ifeq ($(TYPE),release)
-LDPARAM = -s
-CCPARAM = -O2
-MACROS = NDEBUG
-endif
-
 # Add directories to the include and library paths
 INCPATH = $(HOME)/Development/include
 LIBPATH =
@@ -73,6 +54,35 @@ DFILES := $(addprefix $(STORE)/,$(SOURCE:.c=.d))
 
 # function for reversing a list. this should be a standard function ...
 reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
+
+# The next blocks change some variables depending on the build type
+ifeq ($(TYPE),debug)
+LDPARAM =
+CCPARAM = -Wall -pedantic -ansi -g3
+MACROS =
+endif
+
+ifeq ($(TYPE),profile)
+LDPARAM = -pg /lib/libc.so.5
+CCPARAM = -Wall -pedantic -ansi -pg
+MACROS = NDEBUG
+endif
+
+ifeq ($(TYPE),release)
+LDPARAM = -s
+CCPARAM = -O2
+MACROS = NDEBUG
+endif
+
+ifeq ($(TYPE),check)
+LDPARAM =
+CCPARAM = -Wall -pedantic -ansi -g3
+MACROS =
+DIRS = . test
+TARGET = check
+SOURCE := $(filter-out ./main.c, $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.c)))
+OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
+endif
 
 # Specify phony rules. These are rules that are not real files.
 .PHONY: all clean distclean backup dirs
@@ -99,6 +109,7 @@ $(STORE)/%.o: %.c
 %.h: ;
 
 # Cleans up the objects, .d files and executables.
+# FIXME: doesn't consider make TYPE=check (we can have multiple stores)
 clean:
 	@-$(foreach DIR,$(DIRS),echo " RM	$(STORE)/$(DIR)/*.d"; \
 		rm -f $(STORE)/$(DIR)/*.d; \
@@ -107,11 +118,13 @@ clean:
 	@-$(foreach DIR,$(call reverse, $(sort $(patsubst .,"",$(DIRS)))),if [ -d $(STORE)/$(DIR) ]; \
 		then echo " RM	$(STORE)/$(DIR)"; rmdir $(STORE)/$(DIR); fi; )
 
+# FIXME: doesn't consider make TYPE=check (we can have multiple targets)
 distclean: clean
 	@echo " RM	$(TARGET)"
 	@-rm -f $(TARGET)
 
 # Backup the source files.
+# FIXME: when TYPE=check backup is broken: SOURCE doesn't include test code
 backup:
 	@-if [ ! -e .backup ]; then mkdir .backup; fi;
 	@if [ -e $(PROJECT_FILENAME) ]; then echo "Directory $(PROJECT_FILENAME) already exists." >&2; false; fi;
