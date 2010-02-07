@@ -46,3 +46,18 @@ TEST(strnicmp_same_case) {
 TEST(strnicmp_different_case) {
     assertEquals(0, strnicmp("Hello", "HELLO", sizeof("Hello")));
 }
+
+TEST(stristr_same_case) {
+    char* text = "Hello world";
+    assertEquals(text+7, stristr(text, "or"));
+}
+
+TEST(stristr_different_case) {
+    char* text = "Hello world";
+    assertEquals(text+7, stristr(text, "oR"));
+}
+
+TEST(stristr_fail) {
+    char* text = "Hello world";
+    assertEquals(NULL, stristr(text, "oRe"));
+}

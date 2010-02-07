@@ -29,6 +29,9 @@ TEST(strichr_fail);
 TEST(strichr_uppercase);
 TEST(strnicmp_same_case);
 TEST(strnicmp_different_case);
+TEST(stristr_same_case);
+TEST(stristr_different_case);
+TEST(stristr_fail);
 
 TEST_SUITE(string_suite) {
     TEST_ADD(strichr_lowercase),
@@ -36,6 +39,9 @@ TEST_SUITE(string_suite) {
     TEST_ADD(strichr_uppercase),
     TEST_ADD(strnicmp_same_case),
     TEST_ADD(strnicmp_different_case),
+    TEST_ADD(stristr_same_case),
+    TEST_ADD(stristr_different_case),
+    TEST_ADD(stristr_fail),
     TEST_SUITE_CLOSURE
 };
 
