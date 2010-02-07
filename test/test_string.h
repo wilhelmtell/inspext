@@ -24,24 +24,14 @@
 
 #include "cu.h"
 
-TEST(strichr_lowercase);
-TEST(strichr_fail);
-TEST(strichr_uppercase);
-TEST(strnicmp_same_case);
-TEST(strnicmp_different_case);
-TEST(stristr_same_case);
-TEST(stristr_different_case);
-TEST(stristr_fail);
+TEST(test_strichr);
+TEST(test_strnicmp);
+TEST(test_stristr);
 
 TEST_SUITE(string_suite) {
-    TEST_ADD(strichr_lowercase),
-    TEST_ADD(strichr_fail),
-    TEST_ADD(strichr_uppercase),
-    TEST_ADD(strnicmp_same_case),
-    TEST_ADD(strnicmp_different_case),
-    TEST_ADD(stristr_same_case),
-    TEST_ADD(stristr_different_case),
-    TEST_ADD(stristr_fail),
+    TEST_ADD(test_strichr),
+    TEST_ADD(test_strnicmp),
+    TEST_ADD(test_stristr),
     TEST_SUITE_CLOSURE
 };
 

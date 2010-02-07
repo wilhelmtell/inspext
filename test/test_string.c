@@ -22,42 +22,21 @@
 #include <string.h>
 #include <ctype.h>
 
-TEST(strichr_lowercase) {
+TEST(test_strichr) {
     char* text = "Hello world";
     assertEquals(text+2, strichr(text, 'l'));
-}
-
-TEST(strichr_fail) {
-    char* text = "Hello world";
     assertEquals(NULL, strichr(text, 'n'));
-}
-
-TEST(strichr_uppercase) {
-    char* text = "Hello world";
     assertEquals(text+4, strichr(text, 'O'));
 }
 
-int strnicmp(const char *s1, const char *s2, size_t n);
-
-TEST(strnicmp_same_case) {
+TEST(test_strnicmp) {
     assertEquals(0, strnicmp("Hello", "Hello", sizeof("Hello")));
-}
-
-TEST(strnicmp_different_case) {
     assertEquals(0, strnicmp("Hello", "HELLO", sizeof("Hello")));
 }
 
-TEST(stristr_same_case) {
+TEST(test_stristr) {
     char* text = "Hello world";
     assertEquals(text+7, stristr(text, "or"));
-}
-
-TEST(stristr_different_case) {
-    char* text = "Hello world";
     assertEquals(text+7, stristr(text, "oR"));
-}
-
-TEST(stristr_fail) {
-    char* text = "Hello world";
     assertEquals(NULL, stristr(text, "oRe"));
 }
