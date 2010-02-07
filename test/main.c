@@ -30,6 +30,7 @@ TEST_SUITES {
 
 int main(int argc, char* argv[])
 {
+    CU_SET_OUT_PREFIX("test/regressions/");
     CU_RUN(argc, argv);
     return EXIT_SUCCESS;
 }
