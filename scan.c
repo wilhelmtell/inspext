@@ -1,6 +1,36 @@
+/******************************************************************************
+ * Copyright (C) 2010 Matan Nassau
+ *
+ * This file is part of INSPext.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *****************************************************************************/
+
 #include "scan.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+char* token_s(enum token_type t)
+{
+    if( t == HEADING_TOKEN ) return "HEADING_TOKEN";
+    else if( t == CHARACTER_TOKEN ) return "CHARACTER_TOKEN";
+    else if( t == PARAGRAPH_TOKEN ) return "PARAGRAPH_TOKEN";
+    else if( t == INDENT_TOKEN ) return "INDENT_TOKEN";
+    else if( t == END_TOKEN ) return "END_TOKEN";
+    else if( t == UNDEFINED_TOKEN ) return "UNDEFINED_TOKEN";
+    else return "illegal token";
+}
 
 void putback(token* tok, lex_state* lstate)
 {
@@ -69,29 +99,18 @@ static int peekc(FILE* is, lex_state* state)
 static int is_leading_or_delimiting_newline(int ch, FILE* is, lex_state* state)
 {
     enum token_type prev = state->previous_token;
+    int leading_or_trailing;
     int next_ch = peekc(is, state);
 
-    return ch == '\n' && (next_ch == '\n' || prev == UNDEFINED_TOKEN);
+    leading_or_trailing = (prev == UNDEFINED_TOKEN || next_ch == EOF);
+    return ch == '\n' && (next_ch == '\n' || leading_or_trailing);
 }
-
-/* static int is_inside_paragraph(int ch, lex_state* state) */
-/* { */
-    /* enum token_type prev = state->previous_token; */
-    /* return prev == PARAGRAPH_TOKEN || prev == CHARACTER_TOKEN; */
-/* } */
 
 static int is_indenting(int ch, lex_state* state)
 {
     enum token_type prev = state->previous_token;
     return ch == ' ' && (prev == HEADING_TOKEN || prev == INDENT_TOKEN);
 }
-
-/* static int is_at_beginning_of_line(lex_state* state) */
-/* { */
-    /* int prev_ch = state->previous_token_ch; */
-    /* enum token_type prev_type = state->previous_token_type; */
-    /* return prev_type == UNDEFINED_TOKEN || (prev_type == CHARACTER_TOKEN && prev_ch == '\n'); */
-/* } */
 
 /* Scan a token from the given input stream.
  *
@@ -146,18 +165,20 @@ static token* force_scan(FILE* is, lex_state* state)
         }
         putbackc(ch, state);
         return force_scan(is, state);
+    } else if( ch == '\n' && peekc(is, state) == ' ' ) {
+        state->beginning_of_line = 1;
+        return force_scan(is, state);
     } else { /* inside (or about to start) a running text */
         /* A paragraph is a sequence of characters of length 1 character or
          * more, and that spans from the beginning of a line until 2
          * consecutive newlines or until EOF. */
         state->beginning_of_line = 0;
-        if( state->delimited ) {
+        if( state->delimited || state->previous_token == UNDEFINED_TOKEN ) {
             putbackc(ch, state);
             state->delimited = 0;
             state->previous_token = PARAGRAPH_TOKEN;
             return a_token_of(PARAGRAPH_TOKEN, '\0', state->heading_level);
         } else {
-            state->delimited = 0;
             state->previous_token = CHARACTER_TOKEN;
             return a_token_of(CHARACTER_TOKEN, ch, state->heading_level);
         }

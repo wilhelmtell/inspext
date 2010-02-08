@@ -1,31 +1,67 @@
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-#include <stdio.h>
-#include "options.h"
-#include "gen_plain.h"
+/******************************************************************************
+ * Copyright (C) 2010 Matan Nassau
+ *
+ * This file is part of INSPext.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *****************************************************************************/
 
-void print_usage()
+#include <stdlib.h>
+#include "string.h"
+#include <getopt.h>
+#include "options.h"
+#include "generators.h"
+
+char* options_error_s(options_error err)
 {
-    printf(" Usage: inspec [options]\n\n"
+    if( err == OPTS_ERR_UNRECOGNIZED_TARGET )
+        return "unrecognized target"; /* FIXME: what target? */
+    else if( err == OPTS_ERR_OPEN_WRITE )
+        return "can't open file for writing"; /* FIXME: what file? */
+    else if( err == OPTS_ERR_UNKNOWN_OPTION )
+        return "invalid option"; /* FIXME: what option? */
+    else if( err == OPTS_ERR_OPEN_READ )
+        return "can't open file for reading"; /* FIXME: what file? */
+    else return "unknown commandline option error";
+}
+
+/* TODO: specify defaults in help message. create config.h ? */
+void print_usage(void)
+{
+    printf(" Usage: inspc [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
-            "                    [plaintext, latex]\n"
+            "                    [plaintext, latex, html]\n"
             "-v, --verbose[=n]   Output some trace info\n"
             "-o, --output <out>  Output to file <out>. Use - to specify\n"
-            "                    stdout (default)"
+            "                    stdout (default)\n"
             );
 }
 
-int parse_cl_opts(int argc, char* argv[], conf* opts)
+options_error parse_cl_opts(int argc, char* argv[], conf* opts)
 {
-    int c, success_flag = 1;
+    int c;
+    extern int opterr;
+    options_error err = 0;
     input_file* file, *pos;
     const char * const plaintext = "plaintext";
-    /* const char * const latex = "latex"; */
+    const char * const latex = "latex";
+    const char * const html = "html";
     const char * filename;
     int filename_len = 0;
     char* number_end; /* for strtol() */
 
+    opterr = 0;
     opts->output_file = stdout; /* default */
     while( 1 ) {
         static struct option long_options[] = {
@@ -47,22 +83,26 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             break;
         case 't':
             optarg_len = strlen(optarg);
-            if( strstr(plaintext, optarg) == plaintext ) {
+            if( stristr(plaintext, optarg) == plaintext ) {
                 opts->gen = &gen_plain;
-            /* } else if( strstr(latex, optarg) == latex ) { */
-                /* opts->gen = &gen_latex; */
+            } else if( stristr(latex, optarg) == latex ) {
+                opts->gen = &gen_latex;
+            } else if( stristr(html, optarg) == html ) {
+                opts->gen = &gen_html;
             } else {
-                fprintf(stderr, "ERROR:Unrecognized target %s\n", optarg);
-                success_flag = 0;
+                err = OPTS_ERR_UNRECOGNIZED_TARGET;
                 opts->gen = NULL;
             }
             break;
         case 'v':
-            if( optarg != NULL ) {
+            /* verbose level. --vN or -v[v[...]] */
+            if( optarg == NULL ) { /* no arg given, but still -v given */
+                opts->verbose = VERBOSE_DEFAULT + 1;
+            } else {
                 opts->verbose = strtol(optarg, &number_end, 10);
-                if( number_end == optarg ) { /* strtol() failed */
+                if( number_end == optarg ) { /* strtol failed: count -vvv... */
                     optarg_len = strlen(optarg);
-                    opts->verbose = 1 + optarg_len; /* default fatal == 0 */
+                    opts->verbose = 1 + optarg_len;
                 }
             }
             if( opts->verbose > VERBOSE_DEBUG )
@@ -74,15 +114,11 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
             filename = optarg;
             optarg_len = strlen(optarg);
             if( strncmp(filename, "-", optarg_len) != 0 )
-                if( (opts->output_file = fopen(filename, "w")) == NULL ) {
-                    fprintf(stderr,
-                            "ERROR:Can't open file %s for writing.\n",
-                            filename);
-                    success_flag = 0;
-                }
+                if( (opts->output_file = fopen(filename, "w")) == NULL )
+                    err = OPTS_ERR_OPEN_WRITE;
             break;
         case '?':
-            success_flag = 0;
+            err = OPTS_ERR_UNKNOWN_OPTION;
             break;
         default:
             abort();
@@ -98,15 +134,14 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
         filename_len = strlen(filename);
         file = (input_file*)malloc(sizeof(input_file));
         file->filename = (char*)malloc(filename_len+1);
+        file->next = NULL;
         strncpy(file->filename, filename, filename_len);
         if( strncmp(filename, "-", filename_len) == 0 ) {
             file->stream = stdin;
         } else {
             file->stream = fopen(filename, "r");
-            if( file->stream == NULL ) {
-                fprintf(stderr, "ERROR:Can't open file %s for reading\n", filename);
-                success_flag = 0;
-            }
+            if( file->stream == NULL )
+                err = OPTS_ERR_OPEN_READ;
         }
         ++optind;
         if( file->stream != NULL ) {
@@ -117,5 +152,5 @@ int parse_cl_opts(int argc, char* argv[], conf* opts)
     pos = opts->input_files;
     opts->input_files = opts->input_files->next;
     free(pos);
-    return success_flag;
+    return err;
 }

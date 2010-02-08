@@ -17,28 +17,14 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef PARSE_H_
-#define PARSE_H_
+#ifndef GENERATORS_H_
+#define GENERATORS_H_
 
+#include "parse.h"
 #include <stdio.h>
-#include "scan.h"
 
-typedef struct node {
-    enum {
-        TEXT_NODE,
-        HEADING_NODE,
-        INDENT_NODE,
-        PARAGRAPH_NODE,
-        CHARACTER_NODE,
-        END_NODE
-    } type;
-    struct node* children;
-    struct node* siblings;
-    char ch;
-    int heading_level;
-} node;
+void gen_html(FILE* os, node* syntree);
+void gen_latex(FILE* os, node* syntree);
+void gen_plain(FILE* os, node* syntree);
 
-node* parse_text(FILE* is, lex_state* state);
-void free_node(node* n);
-
-#endif /* PARSE_H_ */
+#endif /* GENERATORS_H_ */

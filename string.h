@@ -17,28 +17,15 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#ifndef PARSE_H_
-#define PARSE_H_
+#ifndef STRING_H_
+#define STRING_H_
 
-#include <stdio.h>
-#include "scan.h"
+#include <string.h>
 
-typedef struct node {
-    enum {
-        TEXT_NODE,
-        HEADING_NODE,
-        INDENT_NODE,
-        PARAGRAPH_NODE,
-        CHARACTER_NODE,
-        END_NODE
-    } type;
-    struct node* children;
-    struct node* siblings;
-    char ch;
-    int heading_level;
-} node;
+/* extension for the standard string.h header */
 
-node* parse_text(FILE* is, lex_state* state);
-void free_node(node* n);
+int strnicmp(const char *s1, const char *s2, size_t n);
+char* strichr(const char* str, int c);
+char* stristr(const char* str1, const char* str2);
 
-#endif /* PARSE_H_ */
+#endif /* STRING_H_ */
