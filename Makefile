@@ -90,7 +90,7 @@ TEST_HEADERS := $(TEST_SOURCE:.c=.h)
 endif
 
 # Specify phony rules. These are rules that are not real files.
-.PHONY: all clean distclean backup dirs
+.PHONY: all clean_check clean distclean backup dirs
 
 # Main target. The @ in front of a command prevents make from displaying
 # it to the standard output.
@@ -121,17 +121,23 @@ $(STORE)/%.o: %.c
 # Empty rule to prevent problems when a header is deleted.
 %.h: ;
 
-# Cleans up the objects, .d files and executables.
-# FIXME: doesn't consider make TYPE=check (we can have multiple stores)
-clean:
-	@-$(foreach DIR,$(DIRS),echo " RM	$(STORE)/$(DIR)/*.d"; \
-		rm -f $(STORE)/$(DIR)/*.d; \
-		echo " RM	$(STORE)/$(DIR)/*.o"; \
-		rm -f $(STORE)/$(DIR)/*.o)
+clean_check:
+	@-echo " RM	test/tmp.*.out"
+	@-rm -f test/tmp.*.out
+	@-echo " RM	test/tmp.*.err"
+	@-rm -f test/tmp.*.err
 	@-echo " RM	test/test_*.h"
 	@-rm -f test/test_*.h
 	@-echo " RM	test/main.c"
 	@-rm -f test/main.c
+
+# Cleans up the objects, .d files and executables.
+# FIXME: doesn't consider make TYPE=check (we can have multiple stores)
+clean: clean_check
+	@-$(foreach DIR,$(DIRS),echo " RM	$(STORE)/$(DIR)/*.d"; \
+		rm -f $(STORE)/$(DIR)/*.d; \
+		echo " RM	$(STORE)/$(DIR)/*.o"; \
+		rm -f $(STORE)/$(DIR)/*.o)
 	@-$(foreach DIR,$(call reverse, $(sort $(patsubst .,"",$(DIRS)))),if [ -d $(STORE)/$(DIR) ]; \
 		then echo " RM	$(STORE)/$(DIR)"; rmdir $(STORE)/$(DIR); fi; )
 
