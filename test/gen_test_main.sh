@@ -36,15 +36,15 @@ done
 shift $(($OPTIND - 1))
 
 if [ $# -eq 0 ]; then
-  echo "Please specify at least one C header file to process." >&2
-  echo "For instance, try running $0 test_file.h"
+  echo "$(basename $0):Please specify at least one C header file to process." >&2
+  echo "$(basename $0):For instance, try running $0 test_file.h"
   exit -1
 fi
 
 FILENAMES=$*
 for FILENAME in $FILENAMES; do
   if [ \! -f $FILENAME -o \! -r $FILENAME ]; then
-    echo "Can't find regular readable file $FILENAME" >&2
+    echo "$(basename $0):Can't find regular readable file $FILENAME" >&2
     exit -1
   fi
 done
