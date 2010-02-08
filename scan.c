@@ -106,24 +106,11 @@ static int is_leading_or_delimiting_newline(int ch, FILE* is, lex_state* state)
     return ch == '\n' && (next_ch == '\n' || leading_or_trailing);
 }
 
-/* static int is_inside_paragraph(int ch, lex_state* state) */
-/* { */
-    /* enum token_type prev = state->previous_token; */
-    /* return prev == PARAGRAPH_TOKEN || prev == CHARACTER_TOKEN; */
-/* } */
-
 static int is_indenting(int ch, lex_state* state)
 {
     enum token_type prev = state->previous_token;
     return ch == ' ' && (prev == HEADING_TOKEN || prev == INDENT_TOKEN);
 }
-
-/* static int is_at_beginning_of_line(lex_state* state) */
-/* { */
-    /* int prev_ch = state->previous_token_ch; */
-    /* enum token_type prev_type = state->previous_token_type; */
-    /* return prev_type == UNDEFINED_TOKEN || (prev_type == CHARACTER_TOKEN && prev_ch == '\n'); */
-/* } */
 
 /* Scan a token from the given input stream.
  *
@@ -186,13 +173,12 @@ static token* force_scan(FILE* is, lex_state* state)
          * more, and that spans from the beginning of a line until 2
          * consecutive newlines or until EOF. */
         state->beginning_of_line = 0;
-        if( state->delimited ) {
+        if( state->delimited || state->previous_token == UNDEFINED_TOKEN ) {
             putbackc(ch, state);
             state->delimited = 0;
             state->previous_token = PARAGRAPH_TOKEN;
             return a_token_of(PARAGRAPH_TOKEN, '\0', state->heading_level);
         } else {
-            state->delimited = 0;
             state->previous_token = CHARACTER_TOKEN;
             return a_token_of(CHARACTER_TOKEN, ch, state->heading_level);
         }

@@ -71,6 +71,9 @@ OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
 # Same for the .d (dependancy) files.
 DFILES := $(addprefix $(STORE)/,$(SOURCE:.c=.d))
 
+# function for reversing a list. this should be a standard function ...
+reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
+
 # Specify phony rules. These are rules that are not real files.
 .PHONY: all clean distclean backup
 
@@ -102,8 +105,8 @@ clean:
 		rm -f $(STORE)/$(DIR)/*.d; \
 		echo " RM	$(STORE)/$(DIR)/*.o"; \
 		rm -f $(STORE)/$(DIR)/*.o)
-	@-$(foreach DIR,$(patsubst .,"",$(DIRS)),if [ -d $(STORE)/$(DIR) ]; \
-		then echo " RM	$(STORE)/$(DIR)"; rmdir -p $(STORE)/$(DIR); fi; )
+	@-$(foreach DIR,$(call reverse, $(sort $(patsubst .,"",$(DIRS)))),if [ -d $(STORE)/$(DIR) ]; \
+		then echo " RM	$(STORE)/$(DIR)"; rmdir $(STORE)/$(DIR); fi; )
 
 distclean: clean
 	@echo " RM	$(TARGET)"
@@ -117,7 +120,6 @@ backup:
 	@cp --archive --parents $(SOURCE) $(HEADERS) $(EXTRA_FILES) $(PROJECT_FILENAME)
 	@tar c $(PROJECT_FILENAME) |gzip -9 >.backup/backup_`date +%Y%m%d%H%M`.tar.gz
 	@rm -rf $(PROJECT_FILENAME)
-
 
 # Includes the .d files so it knows the exact dependencies for every
 # source.
