@@ -51,6 +51,10 @@ HEADERS := $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.h))
 OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
 # Same for the .d (dependancy) files.
 DFILES := $(addprefix $(STORE)/,$(SOURCE:.c=.d))
+# Unit-test files are only defined and relevant when TYPE=check
+TEST_SOURCE :=
+TEST_HEADERS :=
+TEST_MAIN :=
 
 # function for reversing a list. this should be a standard function ...
 reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
@@ -80,8 +84,14 @@ CCPARAM = -Wall -pedantic -ansi -g3
 MACROS =
 DIRS = . test
 TARGET = check
-SOURCE := $(filter-out ./main.c, $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.c)))
+# Unit-test source includes test/main.c instead of ./main.c. We also have to
+# specify test/main.c explicitly, not with a wildcard, because it initially
+# doesn't exist; it will be auto-generated during the build.
+SOURCE := $(filter-out ./main.c, $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.c)) test/main.c)
 OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
+TEST_SOURCE := $(wildcard test/test_*.c)
+TEST_HEADERS := $(TEST_SOURCE:.c=.h)
+TEST_MAIN := test/main.c
 endif
 
 # Specify phony rules. These are rules that are not real files.
@@ -90,10 +100,18 @@ endif
 # Main target. The @ in front of a command prevents make from displaying
 # it to the standard output.
 all: $(TARGET)
-$(TARGET): dirs $(OBJECTS)
+$(TARGET): dirs $(TEST_MAIN) $(OBJECTS)
 	@echo " LD	$(TARGET)"
 	@$(CC) -o $(TARGET) $(OBJECTS) $(LDPARAM) $(foreach LIBRARY, \
 		$(LIBS),-l$(LIBRARY)) $(foreach LIB,$(LIBPATH),-L$(LIB))
+
+test/test_%.h: test/test_%.c
+	@-echo " GEN	$@"
+	@-cd test && ./gen_test_h.sh $(notdir $<) >$(notdir $@)
+
+$(TEST_MAIN): $(TEST_HEADERS)
+	@-echo " GEN	$@"
+	@-cd test && ./gen_test_main.sh $(foreach FILE,$^,$(notdir $(FILE))) >$(notdir $@) && cd ..
 
 # Rule for creating object file and .d file, the sed magic is to add
 # the object path at the start of the file because the files gcc
@@ -115,6 +133,10 @@ clean:
 		rm -f $(STORE)/$(DIR)/*.d; \
 		echo " RM	$(STORE)/$(DIR)/*.o"; \
 		rm -f $(STORE)/$(DIR)/*.o)
+	@-echo " RM	test/test_*.h"
+	@-rm -f test/test_*.h
+	@-echo " RM	test/main.c"
+	@-rm -f test/main.c
 	@-$(foreach DIR,$(call reverse, $(sort $(patsubst .,"",$(DIRS)))),if [ -d $(STORE)/$(DIR) ]; \
 		then echo " RM	$(STORE)/$(DIR)"; rmdir $(STORE)/$(DIR); fi; )
 
