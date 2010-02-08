@@ -24,7 +24,7 @@
 # CU is a unit-testing framework for C; see http://cu.danfis.cz/
 ###############################################################################
 
-OUT_PREFIX="test/regressions/" # by default
+OUT_PREFIX="test/" # by default
 while getopts 'o:' OPT; do
   case $OPT in
     o) OUT_PREFIX=$(echo "$OPTARG" |sed 's/\/*$/\//')
