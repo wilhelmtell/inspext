@@ -51,10 +51,6 @@ HEADERS := $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.h))
 OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
 # Same for the .d (dependancy) files.
 DFILES := $(addprefix $(STORE)/,$(SOURCE:.c=.d))
-# Unit-test files are only defined and relevant when TYPE=check
-TEST_SOURCE :=
-TEST_HEADERS :=
-TEST_MAIN :=
 
 # function for reversing a list. this should be a standard function ...
 reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
