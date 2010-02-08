@@ -104,6 +104,10 @@ test/test_%.h: test/test_%.c
 	@-echo " GEN	$@"
 	@-cd test && ./gen_test_h.sh $(notdir $<) >$(notdir $@)
 
+# FIXME: If test/main.c recompiles then ld fails with dup symbol for _main.
+#        To reproduce: 1. make TYPE=check distclean && make TYPE=check
+#                      2. touch test/main.c
+#                      3. make TYPE=check
 test/main.c: $(TEST_HEADERS)
 	@-echo " GEN	$@"
 	@-cd test && ./gen_test_main.sh $(foreach FILE,$^,$(notdir $(FILE))) >$(notdir $@) && cd ..
