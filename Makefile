@@ -87,7 +87,6 @@ SOURCE := $(filter-out ./main.c, $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.c)) t
 OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
 TEST_SOURCE := $(wildcard test/test_*.c)
 TEST_HEADERS := $(TEST_SOURCE:.c=.h)
-TEST_MAIN := test/main.c
 endif
 
 # Specify phony rules. These are rules that are not real files.
@@ -105,7 +104,7 @@ test/test_%.h: test/test_%.c
 	@-echo " GEN	$@"
 	@-cd test && ./gen_test_h.sh $(notdir $<) >$(notdir $@)
 
-$(TEST_MAIN): $(TEST_HEADERS)
+test/main.c: $(TEST_HEADERS)
 	@-echo " GEN	$@"
 	@-cd test && ./gen_test_main.sh $(foreach FILE,$^,$(notdir $(FILE))) >$(notdir $@) && cd ..
 
