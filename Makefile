@@ -96,7 +96,7 @@ endif
 # Main target. The @ in front of a command prevents make from displaying
 # it to the standard output.
 all: $(TARGET)
-$(TARGET): dirs $(TEST_MAIN) $(OBJECTS)
+$(TARGET): dirs $(OBJECTS)
 	@echo " LD	$(TARGET)"
 	@$(CC) -o $(TARGET) $(OBJECTS) $(LDPARAM) $(foreach LIBRARY, \
 		$(LIBS),-l$(LIBRARY)) $(foreach LIB,$(LIBPATH),-L$(LIB))
