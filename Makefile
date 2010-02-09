@@ -87,6 +87,7 @@ SOURCE := $(filter-out ./main.c, $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.c)) t
 OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
 TEST_SOURCE := $(wildcard test/test_*.c)
 TEST_HEADERS := $(TEST_SOURCE:.c=.h)
+CHECK=./$(TARGET)
 endif
 
 # Specify phony rules. These are rules that are not real files.
@@ -99,6 +100,7 @@ $(TARGET): $(OBJECTS)
 	@echo " LD	$(TARGET)"
 	@$(CC) -o $(TARGET) $(OBJECTS) $(LDPARAM) $(foreach LIBRARY, \
 		$(LIBS),-l$(LIBRARY)) $(foreach LIB,$(LIBPATH),-L$(LIB))
+	$(CHECK)
 
 test/test_%.h: test/test_%.c
 	@-echo " GEN	$@"
