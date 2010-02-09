@@ -37,7 +37,7 @@ shift $(($OPTIND - 1))
 
 if [ $# -eq 0 ]; then
   echo "$(basename $0):Please specify at least one C header file to process." >&2
-  echo "$(basename $0):For instance, try running $0 test_file.h"
+  echo "$(basename $0):For instance, try running $0 test_file.h" >&2
   exit -1
 fi
 
