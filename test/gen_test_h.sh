@@ -26,7 +26,7 @@
 
 if [ $# -eq 0 ]; then
   echo "$(basename $0):Please specify a C implementation file to process." >&2
-  echo "$(basename $0):For instance, try running $0 test_file.c"
+  echo "$(basename $0):For instance, try running $0 test_file.c" >&2
   exit -1
 fi
 
