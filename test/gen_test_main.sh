@@ -87,5 +87,5 @@ echo 'int main(int argc, char* argv[])'
 echo '{'
 echo "    CU_SET_OUT_PREFIX(\"$OUT_PREFIX\");"
 echo '    CU_RUN(argc, argv);'
-echo '    return EXIT_SUCCESS;'
+echo '    return (cu_fail_test_suites || cu_fail_tests || cu_fail_checks);'
 echo '}'
