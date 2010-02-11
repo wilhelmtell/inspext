@@ -30,25 +30,6 @@ LIBS =
 # Dynamic libraries
 DLIBS =
 
-# The next blocks change some variables depending on the build type
-ifeq ($(TYPE),debug)
-LDPARAM =
-CCPARAM = -Wall -pedantic -ansi -g3
-MACROS =
-endif
-
-ifeq ($(TYPE),profile)
-LDPARAM = -pg /lib/libc.so.5
-CCPARAM = -Wall -pedantic -ansi -pg
-MACROS = NDEBUG
-endif
-
-ifeq ($(TYPE),release)
-LDPARAM = -s
-CCPARAM = -O2
-MACROS = NDEBUG
-endif
-
 # Add directories to the include and library paths
 INCPATH = $(HOME)/Development/include
 LIBPATH =
@@ -74,8 +55,43 @@ DFILES := $(addprefix $(STORE)/,$(SOURCE:.c=.d))
 # function for reversing a list. this should be a standard function ...
 reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
 
+# The next blocks change some variables depending on the build type
+ifeq ($(TYPE),debug)
+LDPARAM =
+CCPARAM = -Wall -pedantic -ansi -g3
+MACROS =
+endif
+
+ifeq ($(TYPE),profile)
+LDPARAM = -pg /lib/libc.so.5
+CCPARAM = -Wall -pedantic -ansi -pg
+MACROS = NDEBUG
+endif
+
+ifeq ($(TYPE),release)
+LDPARAM = -s
+CCPARAM = -O2
+MACROS = NDEBUG
+endif
+
+ifeq ($(TYPE),check)
+LDPARAM =
+CCPARAM = -Wall -pedantic -ansi -g3
+MACROS =
+DIRS = . test
+TARGET = check
+# Unit-test source includes test/main.c instead of ./main.c. We also have to
+# specify test/main.c explicitly, not with a wildcard, because it initially
+# doesn't exist; it will be auto-generated during the build.
+SOURCE := $(filter-out ./main.c, $(foreach DIR,$(DIRS),$(wildcard $(DIR)/*.c)) test/main.c)
+OBJECTS := $(addprefix $(STORE)/, $(SOURCE:.c=.o))
+TEST_SOURCE := $(wildcard test/test_*.c)
+TEST_HEADERS := $(TEST_SOURCE:.c=.h)
+CHECK=./$(TARGET)
+endif
+
 # Specify phony rules. These are rules that are not real files.
-.PHONY: all clean distclean backup
+.PHONY: all clean_check clean distclean backup
 
 # Main target. The @ in front of a command prevents make from displaying
 # it to the standard output.
@@ -84,6 +100,19 @@ $(TARGET): $(OBJECTS)
 	@echo " LD	$(TARGET)"
 	@$(CC) -o $(TARGET) $(OBJECTS) $(LDPARAM) $(foreach LIBRARY, \
 		$(LIBS),-l$(LIBRARY)) $(foreach LIB,$(LIBPATH),-L$(LIB))
+	$(CHECK)
+
+test/test_%.h: test/test_%.c
+	@-echo " GEN	$@"
+	@-cd test && ./gen_test_h.sh $(notdir $<) >$(notdir $@)
+
+# FIXME: If test/main.c recompiles then ld fails with dup symbol for _main.
+#        To reproduce: 1. make TYPE=check distclean && make TYPE=check
+#                      2. touch test/main.c
+#                      3. make TYPE=check
+test/main.c: $(TEST_HEADERS)
+	@-echo " GEN	$@"
+	@-cd test && ./gen_test_main.sh $(foreach FILE,$^,$(notdir $(FILE))) >$(notdir $@) && cd ..
 
 # Rule for creating object file and .d file, the sed magic is to add
 # the object path at the start of the file because the files gcc
@@ -99,8 +128,19 @@ $(STORE)/%.o: %.c
 # Empty rule to prevent problems when a header is deleted.
 %.h: ;
 
+clean_check:
+	@-echo " RM	test/tmp.*.out"
+	@-rm -f test/tmp.*.out
+	@-echo " RM	test/tmp.*.err"
+	@-rm -f test/tmp.*.err
+	@-echo " RM	test/test_*.h"
+	@-rm -f test/test_*.h
+	@-echo " RM	test/main.c"
+	@-rm -f test/main.c
+
 # Cleans up the objects, .d files and executables.
-clean:
+# FIXME: doesn't consider make TYPE=check (we can have multiple stores)
+clean: clean_check
 	@-$(foreach DIR,$(DIRS),echo " RM	$(STORE)/$(DIR)/*.d"; \
 		rm -f $(STORE)/$(DIR)/*.d; \
 		echo " RM	$(STORE)/$(DIR)/*.o"; \
@@ -108,11 +148,13 @@ clean:
 	@-$(foreach DIR,$(call reverse, $(sort $(patsubst .,"",$(DIRS)))),if [ -d $(STORE)/$(DIR) ]; \
 		then echo " RM	$(STORE)/$(DIR)"; rmdir $(STORE)/$(DIR); fi; )
 
+# FIXME: doesn't consider make TYPE=check (we can have multiple targets)
 distclean: clean
 	@echo " RM	$(TARGET)"
 	@-rm -f $(TARGET)
 
 # Backup the source files.
+# FIXME: when TYPE=check backup is broken: SOURCE doesn't include test code
 backup:
 	@-if [ ! -e .backup ]; then mkdir .backup; fi;
 	@if [ -e $(PROJECT_FILENAME) ]; then echo "Directory $(PROJECT_FILENAME) already exists." >&2; false; fi;
