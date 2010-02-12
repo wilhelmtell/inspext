@@ -31,6 +31,16 @@
 # CU is a unit-testing framework for C; see http://cu.danfis.cz/
 ###############################################################################
 
+while getopts 'q' OPT; do
+  case $OPT in
+    q) QUIET='1'
+    ;;
+    ?) echo "Usage: $(basename $0) [-q]" >&2
+    ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
 if [ $# -eq 0 ]; then
   FILENAMES=test*.c
 else
@@ -45,9 +55,13 @@ fi
 
 for FILE in $FILENAMES; do
   HFILE=$(echo $FILE |sed 's/\.c$/.h/')
-  echo " GEN	$HFILE"
+  if [ -z "$QUIET" ]; then
+    echo " GEN	$HFILE"
+  fi
   ./gen_test_h.sh $FILE >$HFILE
 done
 FILENAMES=$(echo "$FILENAMES" |sed "s/\.c\( \|$\)/.h /g")
-echo " GEN	main.c"
+if [ -z "$QUIET" ]; then
+  echo " GEN	main.c"
+fi
 ./gen_test_main.sh $FILENAMES >main.c
