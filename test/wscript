@@ -7,8 +7,10 @@ def post(ctx):
 
 def build(bld):
     bld.add_post_fun(post)
+    wd = bld.path.abspath()
+    Utils.exec_command('cd %s && ./register_new_tests.sh -q' % wd)
     bld.new_task_gen(
-        features = 'cc cprogram test',
+        features = 'cc cprogram',
         source = bld.path.ant_glob('*.c'),
         ccflags = ['-Wall', '-ansi', '-pedantic', '-g3'],
         add_objects = 'objs',

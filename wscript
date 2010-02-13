@@ -19,8 +19,6 @@ def set_options(opt):
 def configure(conf):
     conf.check_tool('compiler_cc')
     conf.env.run_tests = Options.options.run_tests
-    if conf.env.run_tests: # FIXME: should be in build step
-        Utils.exec_command('cd test && ./register_new_tests.sh -q')
 
 def build(bld):
     ftr = 'cc'
