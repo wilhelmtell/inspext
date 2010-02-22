@@ -20,6 +20,7 @@
 #include "scan.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 char* token_s(enum token_type t)
 {
@@ -77,16 +78,6 @@ token* a_token(void)
     return tok;
 }
 
-token* a_token_of(enum token_type type, char ch, int heading_level)
-{
-    token* tok = NULL;
-    tok = (token*)malloc(sizeof(token));
-    tok->type = type;
-    tok->ch = ch;
-    tok->heading_level = heading_level;
-    return tok;
-}
-
 static int peekc(FILE* is, lex_state* state)
 {
     int ch = 0;
@@ -98,7 +89,7 @@ static int peekc(FILE* is, lex_state* state)
 
 static int is_leading_or_delimiting_newline(int ch, FILE* is, lex_state* state)
 {
-    enum token_type prev = state->previous_token;
+    enum token_type prev = state->previous_token->type;
     int leading_or_trailing;
     int next_ch = peekc(is, state);
 
@@ -108,8 +99,28 @@ static int is_leading_or_delimiting_newline(int ch, FILE* is, lex_state* state)
 
 static int is_indenting(int ch, lex_state* state)
 {
-    enum token_type prev = state->previous_token;
-    return ch == ' ' && (prev == HEADING_TOKEN || prev == INDENT_TOKEN);
+    token* prev = state->previous_token;
+    return ch == ' ' && (prev->type == HEADING_TOKEN ||
+            prev->type == INDENT_TOKEN ||
+            (prev->type == CHARACTER_TOKEN && prev->ch == '\n'));
+}
+
+static token* token_clone(token* tok)
+{
+    token* clone = NULL;
+    clone = (token*)malloc(sizeof(token));
+    clone->type = tok->type;
+    clone->ch = tok->ch;
+    clone->heading_level = tok->heading_level;
+    return clone;
+}
+
+static void reset_token(token* tok, enum token_type type, char ch, int level)
+{
+    assert(tok != NULL);
+    tok->type = type;
+    tok->ch = ch;
+    tok->heading_level = level;
 }
 
 /* Scan a token from the given input stream.
@@ -124,8 +135,8 @@ static token* force_scan(FILE* is, lex_state* state)
     ch = sipc(is, state);
     if( ch == EOF ) {
         state->beginning_of_line = 0;
-        state->previous_token = END_TOKEN;
-        return a_token_of(END_TOKEN, '\0', state->heading_level);
+        reset_token(state->previous_token, END_TOKEN, '\0', state->heading_level);
+        return token_clone(state->previous_token);
     } else if( ch == ' ' && state->beginning_of_line ) {
         /* A heading is an indented text of length 1 character or more, and
          * that spans from the beginnnig of a line until 2 consecutive newlines
@@ -146,15 +157,15 @@ static token* force_scan(FILE* is, lex_state* state)
                 state->heading_level = i;
             while( i-- > 0 )
                 putbackc(' ', state);
-            state->previous_token = HEADING_TOKEN;
+            reset_token(state->previous_token, HEADING_TOKEN, '\0', state->heading_level);
             state->beginning_of_line = 0;
-            return a_token_of(HEADING_TOKEN, '\0', state->heading_level);
+            return token_clone(state->previous_token);
         }
     } else if( is_indenting(ch, state) ) {
         state->beginning_of_line = 0;
         state->delimited = 0;
-        state->previous_token = INDENT_TOKEN;
-        return a_token_of(INDENT_TOKEN, '\0', state->heading_level);
+        reset_token(state->previous_token, INDENT_TOKEN, '\0', state->heading_level);
+        return token_clone(state->previous_token);
     } else if( is_leading_or_delimiting_newline(ch, is, state) ) {
         state->beginning_of_line = 1;
         state->delimited = 1;
@@ -173,14 +184,14 @@ static token* force_scan(FILE* is, lex_state* state)
          * more, and that spans from the beginning of a line until 2
          * consecutive newlines or until EOF. */
         state->beginning_of_line = 0;
-        if( state->delimited || state->previous_token == UNDEFINED_TOKEN ) {
+        if( state->delimited || state->previous_token->type == UNDEFINED_TOKEN ) {
             putbackc(ch, state);
             state->delimited = 0;
-            state->previous_token = PARAGRAPH_TOKEN;
-            return a_token_of(PARAGRAPH_TOKEN, '\0', state->heading_level);
+            reset_token(state->previous_token, PARAGRAPH_TOKEN, '\0', state->heading_level);
+            return token_clone(state->previous_token);
         } else {
-            state->previous_token = CHARACTER_TOKEN;
-            return a_token_of(CHARACTER_TOKEN, ch, state->heading_level);
+            reset_token(state->previous_token, CHARACTER_TOKEN, ch, state->heading_level);
+            return token_clone(state->previous_token);
         }
     }
 }

@@ -60,7 +60,7 @@ TEST(putback_puts_back) {
         /* line_number       */ 0,
         /* heading_level     */ 0,
         /* filename          */ NULL,
-        /* previous_token    */ UNDEFINED_TOKEN,
+        /* previous_token    */ NULL,
         /* stream_buf        */ NULL,
         /* token_buf         */ NULL
     };
@@ -69,6 +69,7 @@ TEST(putback_puts_back) {
         /* ch            */ '\0',
         /* heading_level */ 0
     };
+    lstate.previous_token = a_token();
     putback(&tok, &lstate);
     assertNotEquals(NULL, lstate.token_buf);
     assertEqualsM(&tok, lstate.token_buf->tok,
@@ -82,7 +83,7 @@ TEST(putback_doesnt_corrupt_token_buf) {
         /* line_number       */ 0,
         /* heading_level     */ 0,
         /* filename          */ NULL,
-        /* previous_token    */ UNDEFINED_TOKEN,
+        /* previous_token    */ NULL,
         /* stream_buf        */ NULL,
         /* token_buf         */ NULL
     };
@@ -96,6 +97,7 @@ TEST(putback_doesnt_corrupt_token_buf) {
         /* ch            */ 'T',
         /* heading_level */ 0
     };
+    lstate.previous_token = a_token();
     putback(&tok1, &lstate);
     putback(&tok2, &lstate);
     assertNotEquals(NULL, lstate.token_buf);

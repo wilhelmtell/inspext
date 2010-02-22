@@ -51,7 +51,7 @@ typedef struct lex_state {
     int lineno;
     int heading_level;
     char* filename;
-    enum token_type previous_token;
+    token* previous_token;
     stream_buf_t* stream_buf;
     token_buf_t* token_buf;
 } lex_state;
@@ -60,5 +60,6 @@ char* token_s(enum token_type t);
 token* peek(FILE* is, lex_state* state);
 void putback(token* tok, lex_state* lstate);
 token* scan(FILE* is, lex_state* lstate);
+token* a_token(void);
 
 #endif /* SCAN_H_ */
