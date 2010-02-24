@@ -140,10 +140,12 @@ static token* force_scan(FILE* is, lex_state* state)
             if( ch == '\n' ) ++state->lineno;
             return force_scan(is, state);
         } else {
-            if( i > state->heading_level )
+            if( i > state->heading_level ) {
                 ++state->heading_level;
-            else
+                i = state->heading_level;
+            } else {
                 state->heading_level = i;
+            }
             while( i-- > 0 )
                 putbackc(' ', state);
             state->previous_token = HEADING_TOKEN;
