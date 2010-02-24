@@ -66,11 +66,6 @@ static node* parse_indented_text(FILE* is, lex_state* lstate)
             /* FIXME: handle error properly */
             free_node(the_node);
             return NULL;
-        }
-        if( tok->ch == '\n' ) {
-            putback(tok, lstate);
-            pos->siblings = child_node = NULL;
-            break;
         } else {
             child_node = (node*)malloc(sizeof(node));
             child_node->type = CHARACTER_NODE;
