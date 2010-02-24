@@ -177,7 +177,18 @@ static token* force_scan(FILE* is, lex_state* state)
         putbackc(ch, state);
         return force_scan(is, state);
     } else if( ch == '\n' && peekc(is, state) == ' ' ) {
-        state->beginning_of_line = 1;
+        ch = sipc(is, state);
+        for( i = 0; ch == ' '; ++i )
+            ch = sipc(is, state);
+        putbackc(ch, state);
+        if( i == state->heading_level ) {
+            putbackc('\n', state);
+        } else {
+            state->beginning_of_line = 1;
+            for( ; i != 0; --i )
+                putbackc(' ', state);
+            ch = '\n';
+        }
         return force_scan(is, state);
     } else { /* inside (or about to start) a running text */
         /* A paragraph is a sequence of characters of length 1 character or
