@@ -151,10 +151,12 @@ static token* force_scan(FILE* is, lex_state* state)
             if( ch == '\n' ) ++state->lineno;
             return force_scan(is, state);
         } else {
-            if( i > state->heading_level )
+            if( i > state->heading_level ) {
                 ++state->heading_level;
-            else
+                i = state->heading_level;
+            } else {
                 state->heading_level = i;
+            }
             while( i-- > 0 )
                 putbackc(' ', state);
             reset_token(state->previous_token, HEADING_TOKEN, '\0', state->heading_level);
@@ -210,8 +212,10 @@ static token* force_scan(FILE* is, lex_state* state)
 token* peek(FILE* is, lex_state* state)
 {
     token* tok;
+    token* orig_prev = state->previous_token;
 
     tok = force_scan(is, state);
+    state->previous_token = orig_prev;
     putbackc(tok->ch, state);
     return tok;
 }
