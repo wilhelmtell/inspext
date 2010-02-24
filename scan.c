@@ -190,8 +190,10 @@ static token* force_scan(FILE* is, lex_state* state)
 token* peek(FILE* is, lex_state* state)
 {
     token* tok;
+    token* orig_prev = state->previous_token;
 
     tok = force_scan(is, state);
+    state->previous_token = orig_prev;
     putbackc(tok->ch, state);
     return tok;
 }
