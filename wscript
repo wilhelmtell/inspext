@@ -19,6 +19,9 @@ def set_options(opt):
 def configure(conf):
     conf.check_tool('compiler_cc')
     conf.env.run_tests = Options.options.run_tests
+    conf.define('APPNAME', APPNAME)
+    conf.define('VERSION', VERSION)
+    conf.write_config_header('config.h')
 
 def build(bld):
     ftr = 'cc'
