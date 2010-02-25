@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
         /* line_number       */ 0,
         /* heading_level     */ 0,
         /* filename          */ NULL,
-        /* previous_token    */ UNDEFINED_TOKEN,
+        /* previous_token    */ NULL,
         /* stream_buf        */ NULL,
         /* token_buf         */ NULL
     };
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
     sanity_error sanerr = 0;
     options_error opterr = 0;
 
-
+    lstate.previous_token = a_token();
     if( (opterr = parse_cl_opts(argc, argv, &opts)) ) {
         fprintf(stderr, "ERROR:%s\n", options_error_s(opterr));
         return EXIT_FAILURE;
@@ -105,5 +105,6 @@ int main(int argc, char* argv[])
         file = file->next;
         free(tmp_file);
     }
+    free(lstate.previous_token);
     return EXIT_SUCCESS;
 }
