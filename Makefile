@@ -1,4 +1,5 @@
-all:
+all: build/default/inspc
+build/default/inspc:
 	@./waf build
 
 check:
