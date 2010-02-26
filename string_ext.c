@@ -17,7 +17,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#include "string.h"
+#include "string_ext.h"
 #include <ctype.h>
 
 /* Credits to http://en.wikibooks.org/wiki/C_Programming/Strings */

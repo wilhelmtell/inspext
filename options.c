@@ -18,7 +18,7 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include "string.h"
+#include "string_ext.h"
 #include <getopt.h>
 #include "options.h"
 #include "generators.h"
