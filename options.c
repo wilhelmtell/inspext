@@ -22,6 +22,7 @@
 #include <getopt.h>
 #include "options.h"
 #include "generators.h"
+#include "config.h"
 
 char* options_error_s(options_error err)
 {
@@ -39,7 +40,7 @@ char* options_error_s(options_error err)
 /* TODO: specify defaults in help message. create config.h ? */
 void print_usage(void)
 {
-    printf(" Usage: inspc [options]\n\n"
+    printf(" Usage: " BINNAME " [options]\n\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
             "                    [plaintext, latex, html]\n"
             "-v, --verbose[=n]   Output some trace info\n"

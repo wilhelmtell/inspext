@@ -21,6 +21,7 @@ def configure(conf):
     conf.env.run_tests = Options.options.run_tests
     conf.define('APPNAME', APPNAME)
     conf.define('VERSION', VERSION)
+    conf.define('BINNAME', 'inspc')
     conf.write_config_header('config.h')
 
 def build(bld):
@@ -37,6 +38,7 @@ def build(bld):
         src = bld.path.ant_glob('*.c')
 
     bld.new_task_gen(
+        includes=".",
         features = ftr,
         source = src,
         ccflags = ['-Wall', '-ansi', '-pedantic', '-g3'],
