@@ -17,9 +17,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
-#include "../string.h"
+#include "../string_ext.h"
 #include "cu.h"
-#include <string.h>
 #include <ctype.h>
 
 TEST(test_strichr) {
