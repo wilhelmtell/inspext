@@ -31,37 +31,63 @@
 # CU is a unit-testing framework for C; see http://cu.danfis.cz/
 ###############################################################################
 
-while getopts 'q' OPT; do
+BIN=$0
+BINNAME=$(basename $BIN)
+print_usage() {
+  echo "Usage: $BINNAME [-q] [-o output_dir]" >&2
+}
+
+OUTPUT_DIR=.
+while getopts 'hsqo:' OPT; do
   case $OPT in
-    q) QUIET='1'
+    h) print_usage
+    exit 0
     ;;
-    ?) echo "Usage: $(basename $0) [-q]" >&2
+    s) STRIP="-s"
+    ;;
+    q) QUIET=1
+    ;;
+    o) OUTPUT_DIR=$(echo -n "$OPTARG" |sed 's/\/*$//')
+    if [ ! -d "$OUTPUT_DIR" -o ! -w "$OUTPUT_DIR" -o ! -x "$OUTPUT_DIR" ]; then
+      echo "$BINNAME:Can't find writable directory $OUTPUT_DIR" >&2
+      exit 1
+    fi
+    ;;
+    ?) print_usage
+    exit 1
     ;;
   esac
 done
 shift $(($OPTIND - 1))
 
+# FIXME: is this really necessary? less code, less bugs
 if [ $# -eq 0 ]; then
   FILENAMES=test*.c
 else
   FILENAMES=$(find $* -maxdepth 1 -name 'test*.c' |tr '\n' ' ')
 fi
-FILENAMES=$(echo "$FILENAMES" | sed 's/^\s\+\|\s\+$//g')
+FILENAMES=$(echo -n "$FILENAMES" | sed 's/^\s\+\|\s\+$//g')
 
 if [ -z "$FILENAMES" ]; then
-  echo "$(basename $0):No test*.c files found." >&2
-  exit -1
+  echo "$BINNAME:No test*.c files found." >&2
+  exit 1
 fi
 
 for FILE in $FILENAMES; do
-  HFILE=$(echo $FILE |sed 's/\.c$/.h/')
+  HFILE=$(echo -n $FILE |sed 's/\.c$/.h/')
   if [ -z "$QUIET" ]; then
     echo " GEN	$HFILE"
   fi
-  ./gen_test_h.sh $FILE >$HFILE
+  ./gen_test_h.sh $FILE >$OUTPUT_DIR/$HFILE
 done
-FILENAMES=$(echo "$FILENAMES" |sed "s/\.c\( \|$\)/.h /g")
+ESCAPED_OUTPUT_DIR=$(echo -n $OUTPUT_DIR |sed 's/\//\\\//g')
+for FILE in $FILENAMES; do
+  FILE=$(echo -n "$FILE" |sed "s/\(.*\)\.c/$ESCAPED_OUTPUT_DIR\/\1.h/")
+  TMPFILENAMES="$TMPFILENAMES $FILE"
+done
+FILENAMES=$TMPFILENAMES
+# FIXME: is this really necessary? less code, less bugs
 if [ -z "$QUIET" ]; then
   echo " GEN	main.c"
 fi
-./gen_test_main.sh $FILENAMES >main.c
+./gen_test_main.sh $STRIP $FILENAMES >$OUTPUT_DIR/main.c

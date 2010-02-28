@@ -24,27 +24,42 @@
 # CU is a unit-testing framework for C; see http://cu.danfis.cz/
 ###############################################################################
 
-OUT_PREFIX="test/" # by default
-while getopts 'o:' OPT; do
+BIN=$0
+BINNAME=$(basename $BIN)
+print_usage() {
+  echo "Usage: $BINNAME [-s] [-o out_prefix] header_file [...]" >&2
+  echo >&2
+  echo " -s             Strip input files into their basenames" >&2
+  echo " -o out_prefix  Set the CU OUT_PREFIX to out_prefix" >&2
+}
+
+OUT_PREFIX="test/" # for CU_SET_OUT_PREFIX()
+while getopts 'hso:' OPT; do
   case $OPT in
+    h) print_usage
+    exit 0
+    ;;
+    s) STRIP=1
+    ;;
     o) OUT_PREFIX=$(echo "$OPTARG" |sed 's/\/*$/\//')
     ;;
-    ?) echo "Usage: $(basename $0) [-o out_prefix]" >&2
+    ?) print_usage
+    exit 1
     ;;
   esac
 done
 shift $(($OPTIND - 1))
 
 if [ $# -eq 0 ]; then
-  echo "$(basename $0):Please specify at least one C header file to process." >&2
-  echo "$(basename $0):For instance, try running $0 test_file.h" >&2
+  echo "$BINNAME:Please specify at least one C header file to process." >&2
+  echo "$BINNAME:For instance, try running $BIN test_file.h" >&2
   exit -1
 fi
 
 FILENAMES=$*
 for FILENAME in $FILENAMES; do
   if [ \! -f $FILENAME -o \! -r $FILENAME ]; then
-    echo "$(basename $0):Can't find regular readable file $FILENAME" >&2
+    echo "$BINNAME:Can't find regular readable file $FILENAME" >&2
     exit -1
   fi
 done
@@ -73,7 +88,11 @@ echo
 echo '#include <stdlib.h>'
 echo '#include "cu.h"'
 for FILENAME in $FILENAMES; do
-  echo "#include \"$FILENAME\""
+  if [ -n "$STRIP" ]; then
+    echo "#include \"$(basename "$FILENAME")\""
+  else
+    echo "#include \"$FILENAME\""
+  fi
 done
 echo
 echo 'TEST_SUITES {'
