@@ -8,10 +8,20 @@ def post(ctx):
 def build(bld):
     bld.add_post_fun(post)
     wd = bld.path.abspath()
-    Utils.exec_command('cd %s && ./register_new_tests.sh -q' % wd)
+    test_files = bld.path.ant_glob('test_*.c')
+    blddir = bld.path.abspath(bld.env)
+    run_script = 'cd %s && ./register_new_tests.sh -s -q -o %s' % (wd, blddir)
     bld.new_task_gen(
-        features = 'cc cprogram',
-        source = bld.path.ant_glob('*.c'),
-        ccflags = ['-Wall', '-ansi', '-pedantic', '-g3'],
-        add_objects = 'objs',
-        target = 'check')
+            name = 'gen',
+            rule = run_script,
+            source = test_files,
+            target = test_files.replace('.c', '.h') + ' main.c',
+            before = 'cc')
+
+    bld.new_task_gen(
+            features = 'cc cprogram',
+            includes = '.',
+            source = bld.path.ant_glob('*.c') + ' main.c',
+            ccflags = ['-Wall', '-ansi', '-pedantic', '-g3'],
+            add_objects = 'objs',
+            target = 'check')
