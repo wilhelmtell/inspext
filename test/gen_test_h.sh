@@ -24,15 +24,18 @@
 # CU is a unit-testing framework for C; see http://cu.danfis.cz/
 ###############################################################################
 
+BIN=$0
+BINNAME=$(basename $BIN)
+
 if [ $# -eq 0 ]; then
-  echo "$(basename $0):Please specify a C implementation file to process." >&2
-  echo "$(basename $0):For instance, try running $0 test_file.c" >&2
+  echo "$BINNAME:Please specify a C implementation file to process." >&2
+  echo "$BINNAME:For instance, try running $BIN test_file.c" >&2
   exit -1
 fi
 
 FILENAME=$1
 if [ \! -f $FILENAME -o \! -r $FILENAME ]; then
-  echo "$(basename $0):Can't find regular readable file $FILENAME" >&2
+  echo "$BINNAME:Can't find regular readable file $FILENAME" >&2
   exit -1
 fi
 
