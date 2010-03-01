@@ -6,7 +6,7 @@ def build(bld):
     wd = bld.path.abspath()
     test_files = bld.path.ant_glob('test_*.c')
     blddir = bld.path.abspath(bld.env)
-    run_script = 'cd %s && ./register_new_tests.sh -s -q -o %s' % (wd, blddir)
+    run_script = 'cd %s && ./register_new_tests.sh -s -q -o %s -p %s' % (wd, blddir, blddir)
     bld.new_task_gen(
             name = 'gen',
             rule = run_script,

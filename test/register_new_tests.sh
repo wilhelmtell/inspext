@@ -38,10 +38,13 @@ print_usage() {
 }
 
 OUTPUT_DIR=.
-while getopts 'hsqo:' OPT; do
+OUTPUT_PREFIX=.
+while getopts 'hsp:qo:' OPT; do
   case $OPT in
     h) print_usage
     exit 0
+    ;;
+    p) OUTPUT_PREFIX=$OPTARG
     ;;
     s) STRIP="-s"
     ;;
@@ -90,4 +93,4 @@ FILENAMES=$TMPFILENAMES
 if [ -z "$QUIET" ]; then
   echo " GEN	main.c"
 fi
-./gen_test_main.sh $STRIP $FILENAMES >$OUTPUT_DIR/main.c
+./gen_test_main.sh $STRIP -o $OUTPUT_PREFIX $FILENAMES >$OUTPUT_DIR/main.c
