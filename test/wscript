@@ -25,4 +25,4 @@ def build(bld):
     bld.new_task_gen(
             name = 'check',
             after = 'cc_link',
-            rule = './default/test/check')
+            rule = '%s/check' % bld.path.abspath(bld.env))
