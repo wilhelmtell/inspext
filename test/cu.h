@@ -120,7 +120,7 @@ extern int cu_fail_tests;
 extern int cu_success_checks;
 extern int cu_fail_checks;
 
-#define CU_OUT_PREFIX_LENGTH 30
+#define CU_OUT_PREFIX_LENGTH 128
 extern char cu_out_prefix[CU_OUT_PREFIX_LENGTH+1];
 
 void cu_run(int argc, char *argv[]);
