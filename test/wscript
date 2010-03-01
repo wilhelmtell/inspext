@@ -2,11 +2,7 @@
 
 import Options, Utils
 
-def post(ctx):
-    Utils.exec_command('build/default/test/check')
-
 def build(bld):
-    bld.add_post_fun(post)
     wd = bld.path.abspath()
     test_files = bld.path.ant_glob('test_*.c')
     blddir = bld.path.abspath(bld.env)
@@ -25,3 +21,8 @@ def build(bld):
             ccflags = ['-Wall', '-ansi', '-pedantic', '-g3'],
             add_objects = 'objs',
             target = 'check')
+
+    bld.new_task_gen(
+            name = 'check',
+            after = 'cc_link',
+            rule = './default/test/check')
