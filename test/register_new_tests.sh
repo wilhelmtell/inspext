@@ -35,6 +35,12 @@ BIN=$0
 BINNAME=$(basename $BIN)
 print_usage() {
   echo "Usage: $BINNAME [-q] [-o output_dir]" >&2
+  echo >&2
+  echo " -o output_dir     Specify output directory" >&2
+  echo " -s                Consider only the basename of the output" >&2
+  echo "                   directory in the #includes in main.c" >&2
+  echo " -p output_prefix  Output directory for regression files" >&2
+  echo " -q                Be quiet" >&2
 }
 
 OUTPUT_DIR=.
