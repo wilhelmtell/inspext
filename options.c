@@ -40,12 +40,15 @@ char* options_error_s(options_error err)
 /* TODO: specify defaults in help message. create config.h ? */
 void print_usage(void)
 {
-    printf(" Usage: " BINNAME " [options]\n\n"
+    printf(" Usage: " BINNAME " [options] <input_file>\n"
+            "\n"
             "-t, --target <arg>  Compile to the given tool/file-format\n"
             "                    [plaintext, latex, html]\n"
             "-v, --verbose[=n]   Output some trace info\n"
             "-o, --output <out>  Output to file <out>. Use - to specify\n"
             "                    stdout (default)\n"
+            "\n"
+            "input_file may be - for denoting stdin.\n"
             );
 }
 
