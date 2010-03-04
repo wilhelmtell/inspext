@@ -32,7 +32,10 @@ static void gen_html_heading(FILE* os, node* syntree, int depth)
     fprintf(os, "\n  <h%d>", depth);
     while( syntree != NULL ) {
         assert(syntree->type == CHARACTER_NODE);
-        fputc(syntree->ch, os);
+        if( syntree->ch == '\n' )
+            fprintf(os, "<br />");
+        else
+            fputc(syntree->ch, os);
         syntree = syntree->siblings;
     }
     fprintf(os, "</h%d>", depth);
