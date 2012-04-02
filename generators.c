@@ -60,8 +60,11 @@ void gen_html(FILE* os, node* syntree)
     node *child;
 
     assert(syntree->type == TEXT_NODE);
+    fprintf(os, "<!DOCTYPE HTML>\n");
     fprintf(os, "<html>\n");
     fprintf(os, "  <head>\n"); /* FIXME: don't hardcode indent */
+    fprintf(os, "    <title></title>\n");
+    fprintf(os, "    <meta charset=\"UTF-8\" />\n");
     fprintf(os, "  </head>\n");
     fputc('\n', os);
     fprintf(os, "  <body>");
