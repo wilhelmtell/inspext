@@ -43,7 +43,7 @@ static void gen_html_heading(FILE* os, node* syntree, int depth)
 
 static void gen_html_paragraph(FILE* os, node* syntree)
 {
-    fprintf(os, "\n\n  <p>\n  ");
+    fprintf(os, "\n  <p>\n  ");
     while( syntree != NULL ) {
         assert(syntree->type == CHARACTER_NODE);
         if( syntree->ch == '\n' )
@@ -52,7 +52,7 @@ static void gen_html_paragraph(FILE* os, node* syntree)
             fputc(syntree->ch, os);
         syntree = syntree->siblings;
     }
-    fprintf(os, "\n  </p>");
+    fprintf(os, "\n  </p>\n");
 }
 
 void gen_html(FILE* os, node* syntree)
