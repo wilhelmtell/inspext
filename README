@@ -41,10 +41,8 @@ forth.  INSPext is not just a language, but also a philosophy.
 
 The INSPext philosophy really expands and formalizes on that of plaintext (or
 so I like telling myself).  The idea is that text should be simple, very
-simple.  Pictures are complex beasts, brochurs are complex beasts, women are
-complex beasts -- but text is a simple beast.  So our text boils down to
-letters, words, sentences, paragraphs, sections (or chapters).  Let's also
-allow for a title, but that's it for now.
+simple.  So our text boils down to letters, words, sentences, paragraphs,
+sections (or chapters).  Let's also allow for a title, but that's it for now.
 
 Perhaps it would be overly religious to disallow tables, but others may say it
 is also fundamental to allow for mathematical expressions, tables of contents,
